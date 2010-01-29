@@ -1,0 +1,211 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+
+  <meta content="text/html;charset=ISO-8859-1" http-equiv="Content-Type">
+  <title>Equation of a quadratic - GeoGebra Exercise</title>
+
+
+  <meta name="generator" content="GeoGebra">
+
+  <style type="text/css"><!--body { font-family:Helvetica,sans-serif; margin-left:40px }--></style>
+
+    <!-- disable F5 (refresh) -->
+<script type="text/javascript" src="disablekey.js"></script>
+  <script type="text/javascript">
+
+  // disable f5 (refresh) in IE
+document.onkeydown = function(){
+
+if(window.event && window.event.keyCode == 116)
+        { // Capture and remap F5
+    window.event.keyCode = 505;
+      }
+
+if(window.event && window.event.keyCode == 505)
+        { // New action for F5
+    return false;
+        // Must return false or the browser will refresh anyway
+    }
+}
+
+var sqrt="\u221A"; // square root
+var sqr="\u00B2"; // superscript 2 ie squared
+var cub="\u00B3"; // superscript 3 ie cubed
+var no_correct=0;
+var time=0;
+window.setTimeout("updatetimer()",1000);
+
+function updatetimer() {
+time++;
+window.setTimeout("updatetimer()",1000);
+}
+ function numberentered()
+{
+  var exp=document.inputform.textfield.value;
+  exp=exp.replace("s",sqr);
+  exp=exp.replace("S",sqr);
+  exp=exp.replace("c",cub);
+  exp=exp.replace("C",cub);
+  exp=exp.replace("X","x");
+  exp=exp.replace("Y","y");
+  if (exp!=document.inputform.textfield.value) document.inputform.textfield.value=exp;
+}
+function process_expression(exp) {
+exp=exp.replace(/\)\(/g,")*("); // replace (x+1)(x+2) by (x+1)*(x+2) etc
+exp=exp.replace(/X/g,"x"); // X by x
+exp=exp.replace(/Y/g,"y"); // Y by y
+exp=exp.replace(/xx/g,"x*x"); // xx by x*x
+exp=exp.replace(/xy/g,"x*y"); // xy by x*y
+exp=exp.replace(/yx/g,"y*x"); // yx by y*x
+exp=exp.replace(/(\d)(x)/g, "$1"+"*"+"$2"); // replace 3x by 3*x etc
+exp=exp.replace(/\(/g," ("); // "( " by "<space>("
+exp=exp.replace(/\)/g,") "); // ")" by ")<space>"
+//exp=yacas_calculate("Rationalize("+exp+");");
+//alert(exp);
+return exp;
+}
+  function randint(a,b)
+{
+  return Math.floor(Math.random()*(b-a+1))+a;
+}
+
+function rand()
+{
+var nos=[0,0,0,0,0,0,1,-1,2,-2,3,-3,4,-4];
+return nos[randint(0,13)];
+}
+
+function randplusminus()
+{
+if (Math.random()<0.5) return -1; else return 1;
+}
+
+function new_question() {
+var applet = document.ggbApplet;
+if (Math.random()<0.5)
+{ // quadratic of form (x-a)(x-b)
+applet.setErrorDialogsActive(false);
+applet.evalCommand("a="+randint(-4,4));
+applet.evalCommand("b="+randint(-4,4));
+applet.evalCommand("c="+randplusminus()); // either +1 or -1
+err=applet.evalCommand("f(x)=c (x-a) (x-b)");
+}
+else
+{ // quadratic of form -(x-d)^2+e
+applet.evalCommand("a="+rand());
+applet.evalCommand("b="+rand());
+applet.evalCommand("c="+randplusminus()); // either +1 or -1
+applet.evalCommand("f(x)=c (x-a)^2 + b");
+
+}
+applet.setVisible("input1", false);
+document.inputform.textfield.value="";
+}
+
+function check() { var applet = document.ggbApplet;
+
+var exp=document.inputform.textfield.value;
+if (exp=="") return;
+exp=process_expression(exp);
+
+applet.setErrorDialogsActive(false);
+
+var success=applet.evalCommand("input1(x) = Polynomial[" + exp + "]");
+if (success==false) // syntax error from GeoGebra
+{
+  alert("Invalid input - please try again");
+  return;
+}
+// check function diff(x) which is the
+// difference between derivative and entered function
+var diff = applet.getValueString("diff").substring(10);
+if (diff == "0") {
+no_correct++;
+alert("Good: "+no_correct+" correct in "+time+" secs");
+new_question();
+window.document.inputform.textfield.focus();
+} else {
+applet.setVisible("input1", true);
+alert("Your solution is not correct. Compare your solution with\nthe red graph and try again.");
+window.document.inputform.textfield.focus();
+//time=0;
+no_correct--;
+if (no_correct<0) no_correct=0;
+}
+}
+      </script>
+</head>
+
+
+<body>
+
+<table style="width: 660px;" border="0" cellpadding="2" cellspacing="2">
+
+  <tbody>
+
+    <tr>
+
+      <td>
+
+       <p>Type in the equation of the red parabola</p>
+
+      <div style="margin: 2px; text-align: center;"><applet name="ggbApplet" code="geogebra.GeoGebraApplet" height="400" width="616">
+      <param name="filename" value="quadratictest.ggb">
+	  <param name="framePossible" value="false">
+	  <param name="enableRightClick" value="false">
+	  <param name="enableShiftDragZoom" value="false">
+	  <param name="showResetIcon" value="false">
+	  
+	  Sorry, the GeoGebra
+Applet could not be started. Please make sure that
+Java 1.4.2 (or later) is installed and activated. (<a href="http://java.sun.com/getjava">click here to install
+Java now</a>) </applet> <br>
+
+      </div>
+
+      <form style="margin-left: 40px;" name="inputform" onkeyup="numberentered()" action="" onsubmit="check();return false;">Equation
+: <span style="font-weight: bold;">y =</span> <input name="textfield" size="50" type="text"> <input value="Check" onclick="check();" type="button"> 
+      </form>
+	  <p>Press "s" for "squared"</p>
+
+      <hr style="width: 100%; height: 2px;"><span style="font-size: small;">Created with <a href="http://www.geogebra.org/" target="_blank">GeoGebra</a>
+
+by Michael Borcherds, November 2007</span> </td>
+
+    </tr>
+
+  </tbody>
+</table>
+
+</body>
+
+
+<form name="form" id="formid" onkeyup="numberentered('textfield');"
+onsubmit="checkanswer();return false;" autocomplete="Off">
+<input type="button" value="Update graph" onclick="update();" style="font-size:16pt;">
+</form>
+
+<script type="text/javascript">
+
+function ggbOnInit() {
+update();
+document.ggbApplet.evalCommand("f(x) =a x^2 + b x + c");
+}
+
+
+function update() {
+document.ggbApplet.setErrorDialogsActive(false);
+for (i = 1; i < 10; i++) {
+	document.ggbApplet.evalCommand("a="+Math.random());
+	document.ggbApplet.evalCommand("b="+Math.random());
+	document.ggbApplet.evalCommand("c="+Math.random());
+}
+
+}
+
+</script>
+
+</html>
+
+

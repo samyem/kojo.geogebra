@@ -1,0 +1,199 @@
+GeoGebra - Dynamic Mathematics for Everyone
+http://www.geogebra.org/
+  
+LICENSE
+  You are free to copy, distribute and transmit GeoGebra 
+  free of charge for non-commercial purposes 
+  (see conditions and details below).  
+
+DEVELOPERS
+  * Markus Hohenwarter (Austria & USA): Project leader, since 2001
+  * Michael Borcherds (UK): Lead developer, since 2007
+  * Yves Kreis (Luxembourg): Developer, since 2005
+
+Contributions by Loic Le Coq (Paris, France 2006); Joan Carles Naranjo, Victor Franco, 
+  Eloi Puertas (Barcelona, Spain 2007); Philipp Weissenbacher (Vienna, Austria 2007); 
+  Cong Liu, Amy Varkey, and Quan Yuan (Florida Atlantic University, USA 2007-2009);
+  Hans-Petter Ulven (Norway 2008); Florian Sonner (Germany 2008);
+  George Sturr (Sebastopol, USA 2009)
+  
+TRANSLATIONS
+  * Arabic: Brahim Boulakbech, Haboubi Abdessalem (Tunisia), Maha Ah (Egypt)
+  * Basque: Gonzalo Elcano Vizcay (Spain)
+  * Bosnian: Maja Hrbat (Bosnia and Herzegovina)
+  * Bulgarian: Hristo Stoyanov (Bulgaria)
+  * Catalan: Jaume Bartroli, Pep Bujosa, Josep Lluis Canadilla, Carlos Gimenez, Antoni Goma, Jorge Sanchez,      
+      Roser Sebastian (Spain)
+  * Chinese (Traditional): Fu-Kwun Hwang, Chen-Hui Lin, Pegasus Roe, Joe Chen (Taiwan)
+  * Chinese (Simplified): Chen Xing (China)
+  * Croatian: Sime Suljic, Ela Rac, Josip Klicinovic (Croatia)
+  * Czech: Marie Pokorna, Pavel Sokol (Czech Republic)
+  * Danish: Steen Grode (Denmark)
+  * Dutch: Beatrijs Versichel, Ivan De Winne, Pedro Tytgat, Carel van de Giessen (Belgium)
+  * English: Markus Hohenwarter, Judith Hohenwarter (Austria), Yves Kreis (Luxembourg),
+      Michael Borcherds (Great Britain)
+  * Estonian: Jane Albre (Estonia)
+  * Finnish: Hannu Korhonen, Juha Leino, Kirsi Malinen (Finland)
+  * French: Noel Lambert (France)
+  * Galician: Jesus Garcia Otero, Irene Arias Lopez (Spain) 
+  * Georgian: Lasha Kokilashvili (Georgia)
+  * German: Markus Hohenwarter, Judith Hohenwarter (Austria), Yves Kreis (Luxembourg)
+  * Greek: Nicholas Mousoulides, Constantinos Christou (Cyprus), 
+      Spiros Mavrogiannis, Manolis Koutlis, Fergadiotis Athanasios (Greece)
+  * Hebrew: Guy Hed (Israel)
+  * Hungarian: Zsuzsanna Papp-Varga, Andras Hrasko, Peter Csiba, Major Zoltan (Hungary)
+  * Icelandic: Freyja Hreinsdottir (Iceland)
+  * Indonesian: Aam Sudrajat (Indonesia)
+  * Italian: Alessandra Tomasi, Simona Riva (Italy)
+  * Japanese: Akihito Wachi, Kazuhiro Hasegawa (Japan)
+  * Korean: Kyeong-Sik Choi (Korea)
+  * Lithuanian: Rokas Tamosiunas (Lithuania)
+  * Macedonian: Linda Fahlberg-Stojanovska, OIKT, Faculty of Technical Sciences, UKLO (FYR Macedonia)
+  * Norwegian: Sigbjorn Hals (Norway)
+  * Persian: Saeed Aminorroaya, Ali SafarNavadeh, Azam Zabihi (Iran)
+  * Polish: Ania Borkowska, Marzanna Miasko, Malgorzata Paliga, Ewa Piwek, Edyta Pobiega, Kasia Winkowska-Nowak (Poland)
+  * Portuguese (Brazil): Humberto Bortolossi, Herminio Borges Neto, Alana Paula, 
+      Luciana de Lima, Araujo Freitas, Alana Souza de Olivieira (Brazil)
+  * Portuguese (Portugal): Jorge Geraldes, Antonio Ribeiro (Portugal)
+  * Russian: Anatoly Scherbakov, Beatrice Versichel (Russia)
+  * Serbian: Djordje Herceg, Dragoslav Herceg (Serbia)
+  * Slovak: Peter Csiba, Iveta Kohanova (Slovakia)
+  * Slovenian: Stanislav Senveter (Slovenia)
+  * Swedish: Jonas Enlund (Finland), Thomas Lingefjard (Sweden)
+  * Spanish: Liliana Saidon (Argentina)
+  * Turkish: Erol Karakirik, Mustafa Dogan, Suleyman Cengiz (Turkey)
+  * Vietnamese: Nguyen Thanh Trung, Quang Nguyen (Vietnam)
+  * Welsh: Uned Gyfieithu Translation Unit, Prifysgol Bangor University; Gwyn Jones (Wales)
+   
+PROJECTS
+  * Florida Atlantic University
+     08/2006 to 07/2009: NSF Math and Science Partnership project SMGEM
+  * University of Luxembourg et. al., co-funded by the Community programme eContentplus
+     09/2007 to 09/2010: Interoperable Interactive Geometry for Europe (Intergeo)
+  * University of Luxembourg
+     01/2007 to 12/2009: GeoGebra for Primary School 
+  * Austrian Federal Ministry for Education, Science and Culture
+     01/2006 to 12/2007: GeoGebra for Austrian Schools
+  * Austrian Academy of Sciences
+     02/2004 to 01/2006: DOC scholarship for Markus Hohenwarter
+     
+SUPPORT 
+  * Department of Mathematical Sciences, Florida Atlantic University
+      Prof. Heinz-Otto Peitgen and Prof. Richard Voss, NSF MSP project SMGEM
+      2007-2009: support of software development with students Cong Liu, Amy Varkey, and Quan Yuan
+      2006-2009: support of workshops and presentations throughout the USA
+  * Faculty LSHASE, University of Luxembourg
+      since 2009: hosting the GeoGebra website
+      since 2005: providing the multi-platform software deployment solutio
+  * Department of Mathematics, University of Salzburg
+      2002-2009: hosting the GeoGebra website   
+  
+SOFTWARE
+  * MathPiper, https://mathrider.dev.java.net
+  * Jasymca, http://webuser.hs-furtwangen.de/~dersch/
+  * Jama, http://math.nist.gov/javanumerics/jama/
+  * FreeHEP Java Libraries, http://java.freehep.org
+  * Java EPS Graphics2D package, http://www.jibble.org/epsgraphics
+  * HotEqn, http://www.atp.rub.de/VCLab/software/HotEqn/HotEqn.html
+  * Tango Icon Gallery, http://tango.freedesktop.org
+  
+----------------------------------------------------------------------
+
+GeoGebra - Dynamic Mathematics for Everyone
+http://www.geogebra.org/
+
+                                LICENSE
+
+1) GeoGebra Language Files and Documentation License:
+   Creative Commons Attribution-Share Alike 3.0 or later
+
+2) GeoGebra Source Code License:
+   GNU General Public License v2 or later
+
+3) GeoGebra Installers License:
+   Creative Commons Attribution-Noncommercial-Share Alike 3.0 or later
+
+Note for Commercial Users (e.g. publishers or online schools)
+  If you would like to use GeoGebra applets, installers, or documentation
+  for commercial purposes and put the resulting work under your copyright
+  (e.g. for books, online courses, or on websites under your own copyright),
+  you can do so by setting up a commercial usage agreement with GeoGebra. 
+  Please write to office@geogebra.org for details and we will help you to
+  find a simple and good solution for your specific purposes.
+
+Note for Non-commercial Users (e.g private, schools, or universities)
+  You may use and distribute GeoGebra free of charge at home, 
+  in school and universities under the conditions explained below.
+
+----------------------------------------------------------------------
+
+1) GeoGebra Language Files and Documentation License
+
+   All GeoGebra language and documentation files are subject to 
+   the following Creative Commons Attribution-Share Alike License; 
+   either version 3.0 of the License, or (at your option) any later 
+   version (see http://creativecommons.org/licenses/by-sa/3.0/):
+
+   You are free to copy, distribute, transmit, and adapt GeoGebra 
+   language files and documentation under the following conditions:
+    * Attribution. You must attribute the work
+        (i.e. by linking to http://www.geogebra.org/)
+    * Share Alike. If you alter, transform, or build upon this work, 
+        you may distribute the resulting work only under the same, 
+        similar or a compatible license.
+
+   GeoGebra file types that are subject to the abovmentioned license:
+    * GeoGebra language files are ...
+        the user interface language files ("properties files") for 
+        all languages used by the GeoGebra application and applets. 
+        They are part of every official GeoGebra binary distribution.
+    * GeoGebra documentation files are ...
+        all "GeoGebra Help", "GeoGebra Quickstart" and other 
+        documentation files found on the GeoGebra webserver.
+
+----------------------------------------------------------------------
+
+2) GeoGebra Source Code License
+
+   GeoGebra's source code is subject to the GNU General Public License
+   (see http://www.gnu.org/licenses/):
+
+   This program is free software; you can redistribute it and/or modify 
+   it under the terms of the GNU General Public License as published by 
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful, 
+   but WITHOUT ANY WARRANTY; without even the implied warranty of 
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
+   GNU General Public License for more details.
+
+   You can find GeoGebra's source code at 
+     http://www.geogebra.org/source/program/
+   If you would like to help with programming, please write to 
+     office@geogebra.org
+
+----------------------------------------------------------------------
+
+3) GeoGebra Installers License
+
+   All GeoGebra installers are subject to the following Creative Commons 
+   Attribution-Noncommercial-Share Alike License; either version 3.0 of 
+   the License, or (at your option) any later version 
+   (see http://creativecommons.org/licenses/by-nc-sa/3.0/):
+
+   You are free to copy, distribute, transmit, and adapt GeoGebra 
+   installers under the following conditions:
+    * Attribution. You must attribute the work
+        (i.e. by linking to http://www.geogebra.org/)
+    * Noncommercial. You may not use this work for commercial purposes
+        (unless you have approval from GeoGebra, please contact us
+         at office@geogebra.org).
+    * Share Alike. If you alter, transform, or build upon this work, 
+        you may distribute the resulting work only under the same, 
+        similar or a compatible license.
+
+   GeoGebra installers are ...
+     installation packages that let you install the GeoGebra 
+     application and/or documentation files on your system 
+     (MS Windows, Mac OS X, Linux, etc.) including GeoGebra WebStart.
