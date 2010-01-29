@@ -2666,8 +2666,8 @@ public abstract class Application implements KeyEventDispatcher {
 			// application codebase
 			String path = GeoGebra.class.getProtectionDomain().getCodeSource().getLocation().toExternalForm();
 			// remove "geogebra.jar" from end of codebase string
-			if (path.endsWith(JAR_FILES[0])) 
-				path = path.substring(0, path.length() -  JAR_FILES[0].length());
+			if (path.endsWith(JAR_FILES[0] + "!/")) 
+				path = path.substring(0, path.length() -  JAR_FILES[0].length() - 2);
 			
 			// set codebase
 			codebase = new URL(path);	

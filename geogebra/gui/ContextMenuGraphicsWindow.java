@@ -19,6 +19,7 @@ the Free Software Foundation.
 package geogebra.gui;
 
 import geogebra.euclidian.EuclidianView;
+import geogebra.gui.menubar.GeoGebraMenuBar;
 import geogebra.kernel.Kernel;
 import geogebra.main.Application;
 
@@ -120,7 +121,16 @@ implements ActionListener {
         miProperties.addActionListener(this);
         miProperties.setBackground(bgColor);
         add(miProperties);                 
-    }
+
+        addSeparator();     
+        
+        if (app.getGuiManager().getMenuBar() == null) {
+        	app.getGuiManager().initMenubar();
+        }
+        add(((GeoGebraMenuBar)app.getGuiManager().getMenuBar()).getViewMenu());
+        add(((GeoGebraMenuBar)app.getGuiManager().getMenuBar()).getOptionsMenu());
+        add(((GeoGebraMenuBar)app.getGuiManager().getMenuBar()).getEditMenu());
+}
         
     public void actionPerformed(ActionEvent e) {                                            
     	String cmd = e.getActionCommand();
