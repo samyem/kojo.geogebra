@@ -1,5 +1,7 @@
 package geogebra.kernel;
 
+import geogebra.main.Application;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -29,7 +31,7 @@ public class AnimationManager implements ActionListener {
 		
 	public synchronized void startAnimation() {
 		if (!timer.isRunning() && animatedGeos.size() > 0) {
-			udpateNeedToShowAnimationButton();
+			updateNeedToShowAnimationButton();
 			timer.start();			
 		}
 	}
@@ -37,7 +39,7 @@ public class AnimationManager implements ActionListener {
 	public synchronized void stopAnimation() {
 		if (timer.isRunning()) {			
 			timer.stop();
-			udpateNeedToShowAnimationButton();
+			updateNeedToShowAnimationButton();
 		}
 	}
 	
@@ -48,7 +50,7 @@ public class AnimationManager implements ActionListener {
 		}
 		
 		animatedGeos.clear();		
-		udpateNeedToShowAnimationButton();
+		updateNeedToShowAnimationButton();
 	}
 	
 	/**
@@ -78,7 +80,7 @@ public class AnimationManager implements ActionListener {
 	/**
 	 * Updates the needToShowAnimationButton value.
 	 */
-	public void udpateNeedToShowAnimationButton() {
+	public void updateNeedToShowAnimationButton() {
 		int size = animatedGeos.size();
 		if (size == 0) {
 			needToShowAnimationButton = false;
@@ -89,7 +91,7 @@ public class AnimationManager implements ActionListener {
 		for (int i=0; i < size; i++) {
 			GeoElement geo = (GeoElement) animatedGeos.get(i);
 			GeoElement animObj = geo.getAnimationSpeedObject();
-			if (animObj == null || !animObj.isLabelSet() && animObj.isIndependent()) {
+				if (animObj == null || (!animObj.isLabelSet() && animObj.isIndependent())) {
 				needToShowAnimationButton = true;
 				return;
 			}
@@ -136,8 +138,8 @@ public class AnimationManager implements ActionListener {
 	final public synchronized void addAnimatedGeo(GeoElement geo) {
 		if (geo.isAnimating() && !animatedGeos.contains(geo)) {
 			animatedGeos.add(geo);		
-			if (animatedGeos.size() == 1)
-				udpateNeedToShowAnimationButton();
+			//if (animatedGeos.size() == 1) removed, might have geos with variable controlling speed
+				updateNeedToShowAnimationButton();
 		}
 	}
 	
@@ -148,6 +150,7 @@ public class AnimationManager implements ActionListener {
 		if (animatedGeos.remove(geo) && animatedGeos.size() == 0) { 
 				stopAnimation();
 		}
+		updateNeedToShowAnimationButton(); // added, might have geos with variable controlling speed
 	}
 	
 	/**

@@ -59,6 +59,7 @@ public abstract class Drawable {
 	private boolean labelHasIndex = false;
 	Rectangle labelRectangle = new Rectangle(); // for label hit testing
 	Shape strokedShape, strokedShape2;
+
 	
 	private int lastFontSize = -1;
 	

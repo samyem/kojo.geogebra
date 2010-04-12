@@ -53,6 +53,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -74,6 +75,10 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.text.JTextComponent;
+import javax.swing.text.MutableAttributeSet;
+import javax.swing.text.html.HTML;
+import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.text.html.parser.ParserDelegator;
 
 
 /**
@@ -1543,62 +1548,9 @@ public class DefaultGuiManager implements GuiManager {
 		try {
 			FileInputStream fis = null;
 			fis = new FileInputStream(file);
-			BufferedReader myInput = new BufferedReader
-			(new InputStreamReader(fis));
 
-			StringBuffer sb = new StringBuffer();
-
-			String thisLine;
-
-			boolean started = false;
-
-			while ((thisLine = myInput.readLine()) != null)  {
-
-				// don't start reading until ggbBase64 tag
-				if (!started && thisLine.indexOf("ggbBase64") > -1) started = true;
-
-				if (started) {
-					sb.append(thisLine);
-
-					if (thisLine.indexOf("</applet>") > -1) break;
-				}
-
-
-
-			}
-
-			String fileArgument = sb.toString();
-
-			String matchString = "name=\"ggbBase64\" value=\"";
-
-			int start = fileArgument.indexOf(matchString);
+			success = loadBase64fromHTML(fis);
 			
-			// match "/> or " /> or "> etc
-			int end   = fileArgument.indexOf(">");
-			while (end > start && fileArgument.charAt(end) != '\"') end--;
-
-			// check for two <param> tags on the same line
-			if (start > end) {
-				fileArgument = fileArgument.substring(start);
-				start = 0;
-				end   = fileArgument.indexOf(">");
-				while (end > start && fileArgument.charAt(end) != '\"') end--;
-			}
-			
-			if (start < 0 || end < 0 || end <= start) {
-				app.setDefaultCursor();
-				app.showError(app.getError("LoadFileFailed") + ":\n" + file);
-				return false;
-			}
-
-			//Application.debug(fileArgument.substring(start, end));
-
-			// decode Base64
-			byte[] zipFile = geogebra.util.Base64.decode(fileArgument
-					.substring(matchString.length() + start, end));
-
-			// load file
-			success = app.loadXML(zipFile);   
 		} catch (Exception e) {
 			app.setDefaultCursor();
 			app.showError(app.getError("LoadFileFailed") + ":\n" + file);
@@ -1610,6 +1562,49 @@ public class DefaultGuiManager implements GuiManager {
 		return success;
 
 	}
+	
+	static String base64Str;
+	
+	public boolean loadBase64fromHTML(InputStream fis) throws IOException {
+
+		BufferedReader myInput = new BufferedReader(new InputStreamReader(fis));
+
+		HTMLEditorKit.ParserCallback callback = 
+			new HTMLEditorKit.ParserCallback () {
+			
+			boolean base64Found = false;
+			
+			public void handleSimpleTag(HTML.Tag tag, 
+                    MutableAttributeSet attrSet, int pos) {
+				if (!base64Found && tag == HTML.Tag.PARAM) {
+					if (((String)attrSet.getAttribute(HTML.Attribute.NAME)).toLowerCase(Locale.US).equals("ggbbase64")) {
+						//Application.debug(""+attrSet.getAttribute(HTML.Attribute.VALUE));
+						
+						//Application.debug("base64 found using HTML parser");
+						
+						base64Found = true;
+						base64Str = (String)attrSet.getAttribute(HTML.Attribute.VALUE);
+					}
+				} 
+			}
+		};
+		
+		 Reader reader = new InputStreamReader (fis);
+		new ParserDelegator().parse(reader, callback, true);
+		
+		if (base64Str != null) {
+			// decode Base64
+			byte[] zipFile = geogebra.util.Base64.decode(base64Str);
+			base64Str = null;
+			
+			// load file
+			return app.loadXML(zipFile);   
+		}
+		
+		return false;
+
+	}
+
 		
 	private void updateGUIafterLoadFile(boolean isMacroFile) {
 		if (isMacroFile) {

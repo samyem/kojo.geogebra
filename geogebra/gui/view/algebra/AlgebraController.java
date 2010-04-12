@@ -27,6 +27,7 @@ import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.util.Iterator;
 
 import javax.swing.tree.TreePath;
 
@@ -61,6 +62,8 @@ public class AlgebraController
 	/*
 	 * MouseListener implementation for popup menus
 	 */
+	
+	private GeoElement lastSelectedGeo = null;
 
 	public void mouseClicked(java.awt.event.MouseEvent e) {	
 		// right click is consumed in mousePressed
@@ -113,11 +116,55 @@ public class AlgebraController
 			else {					
 				// handle selecting geo
 				if (Application.isControlDown(e)) {
-					app.toggleSelectedGeo(geo); 													
+					app.toggleSelectedGeo(geo); 	
+					if (app.getSelectedGeos().contains(geo)) lastSelectedGeo = geo;
 //					app.geoElementSelected(geo, true);
+				} else if (e.isShiftDown() && lastSelectedGeo != null) {
+					boolean nowSelecting = true;
+					boolean selecting = false;
+					boolean aux = geo.isAuxiliaryObject();
+					boolean ind = geo.isIndependent();
+					boolean aux2 = lastSelectedGeo.isAuxiliaryObject();
+					boolean ind2 = lastSelectedGeo.isIndependent();
+					
+					if ((aux == aux2 && aux == true) || (aux == aux2 && ind == ind2)) {
+						
+						Iterator it = kernel.getConstruction().getGeoSetLabelOrder().iterator();
+						
+						boolean direction = geo.getLabel().compareTo(lastSelectedGeo.getLabel()) < 0;
+						
+						while (it.hasNext()) {
+							GeoElement geo2 = (GeoElement)it.next();
+							if ((geo2.isAuxiliaryObject() == aux && aux == true)
+									|| (geo2.isAuxiliaryObject() == aux && geo2.isIndependent() == ind)) {
+								
+								if (direction && geo2 == lastSelectedGeo) selecting = !selecting;
+								if (!direction && geo2 == geo) selecting = !selecting;
+								
+								if (selecting) {
+									app.toggleSelectedGeo(geo2);
+									nowSelecting = app.getSelectedGeos().contains(geo2);
+								}
+								
+								if (!direction && geo2 == lastSelectedGeo) selecting = !selecting;
+								if (direction && geo2 == geo) selecting = !selecting;
+							}
+						}
+					}
+
+					if (nowSelecting) {
+						app.addSelectedGeo(geo); 
+						lastSelectedGeo = geo;
+					} else {
+						app.removeSelectedGeo(lastSelectedGeo);
+						lastSelectedGeo = null;
+					}
+					//lastSelectedGeo = geo;
+					
 				} else {							
 					app.clearSelectedGeos();
 					app.addSelectedGeo(geo);
+					lastSelectedGeo = geo;
 //					app.geoElementSelected(geo, false);
 				}
 			}

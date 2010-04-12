@@ -23,6 +23,7 @@ import geogebra.kernel.GeoElement;
 import geogebra.kernel.GeoPoint;
 import geogebra.kernel.GeoVec2D;
 import geogebra.kernel.GeoVector;
+import geogebra.main.Application;
 
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
@@ -49,6 +50,7 @@ public class DrawVector extends Drawable implements Previewable {
 	private double [] coordsB = new double[2];   
 	private double [] coordsV = new double[2]; 
     private GeneralPath gp; // for arrow   
+    private boolean arrowheadVisible, lineVisible;
     private ArrayList points;
     
     /** Creates new DrawVector */
@@ -145,35 +147,52 @@ public class DrawVector extends Drawable implements Previewable {
 		  
         // set clipped line
 		if (line == null) line = new Line2D.Double();
+		lineVisible = true;
 		if (onscreenA && onscreenB) {
 			// A and B on screen
 			line.setLine(coordsA[0], coordsA[1], coordsF[0], coordsF[1]);
 		} else {
 			// A or B off screen
 			// clip at screen, that's important for huge coordinates
+			// check if any of vector is on-screen
 			Point2D.Double [] clippedPoints = 
-				Clipping.getClipped(coordsA[0], coordsA[1], coordsF[0], coordsF[1], 0, view.width, 0, view.height);
+				Clipping.getClipped(coordsA[0], coordsA[1], coordsB[0], coordsB[1], -EuclidianView.CLIP_DISTANCE, view.width + EuclidianView.CLIP_DISTANCE, -EuclidianView.CLIP_DISTANCE, view.height + EuclidianView.CLIP_DISTANCE);
 			if (clippedPoints == null) {
 				isVisible = false;	
+				lineVisible = false;
+				arrowheadVisible = false;
 			} else {
-				line.setLine(clippedPoints[0].x, clippedPoints[0].y, clippedPoints[1].x, clippedPoints[1].y);
+				
+				// now re-clip at A and F
+				clippedPoints = 
+					Clipping.getClipped(coordsA[0], coordsA[1], coordsF[0], coordsF[1], -EuclidianView.CLIP_DISTANCE, view.width + EuclidianView.CLIP_DISTANCE, -EuclidianView.CLIP_DISTANCE, view.height + EuclidianView.CLIP_DISTANCE);
+				if (clippedPoints != null)
+					line.setLine(clippedPoints[0].x, clippedPoints[0].y, clippedPoints[1].x, clippedPoints[1].y);
+				else 
+					lineVisible = false;
 			}
 		}
 		
-		// add triangle if end point on screen
+		// add triangle if visible
 		  if (gp == null) 
 			 gp = new GeneralPath();
 		  else 
 			gp.reset();
-		if (onscreenB && length > 0) {
-			  coordsV[0] /= 4.0;
-			  coordsV[1] /= 4.0;  
-			  
-			  gp.moveTo((float) coordsB[0], (float) coordsB[1]); // end point
-			  gp.lineTo((float) (coordsF[0] - coordsV[1]), (float)(coordsF[1] + coordsV[0]));
-			  gp.lineTo((float)(coordsF[0] + coordsV[1]), (float)(coordsF[1] - coordsV[0]));
-			  gp.closePath();	
-		}
+		  
+		  if (isVisible) {
+
+			if (length > 0) {
+				  coordsV[0] /= 4.0;
+				  coordsV[1] /= 4.0;  
+				  
+				  gp.moveTo((float) coordsB[0], (float) coordsB[1]); // end point
+				  gp.lineTo((float) (coordsF[0] - coordsV[1]), (float)(coordsF[1] + coordsV[0]));
+				  gp.lineTo((float)(coordsF[0] + coordsV[1]), (float)(coordsF[1] - coordsV[0]));
+				  gp.closePath();	
+			}
+			
+			arrowheadVisible = onscreenB || gp.intersects(0,0, view.width, view.height);
+		  }
     }
     
     public void draw(Graphics2D g2) {
@@ -187,13 +206,13 @@ public class DrawVector extends Drawable implements Previewable {
             if (geo.doHighlighting()) {
                 g2.setPaint(v.getSelColor());
                 g2.setStroke(selStroke);            
-                g2.draw(line);       
+                if (lineVisible) g2.draw(line);       
             }
             
             g2.setPaint(v.getObjectColor());
 			g2.setStroke(objStroke);  
-			g2.draw(line);              
-            g2.fill(gp);
+			if (lineVisible) g2.draw(line);              
+			if (arrowheadVisible) g2.fill(gp);
                                               
             if (labelVisible) {
 				g2.setFont(view.fontVector);
@@ -207,8 +226,8 @@ public class DrawVector extends Drawable implements Previewable {
 	final void drawTrace(Graphics2D g2) {
 		g2.setPaint(v.getObjectColor());
 		g2.setStroke(objStroke);  
-		g2.draw(line);  
-		g2.fill(gp);       
+		if (lineVisible) g2.draw(line);  
+		if (arrowheadVisible) g2.fill(gp);       
 	}
     
 	final public void updatePreview() {		
@@ -264,8 +283,8 @@ public class DrawVector extends Drawable implements Previewable {
 		if (isVisible) {		
 			g2.setPaint(ConstructionDefaults.colPreview);
 			g2.setStroke(objStroke);  
-			g2.fill(gp);                                    
-			g2.draw(line);                                    			      
+			if (arrowheadVisible) g2.fill(gp);                                    
+			if (lineVisible) g2.draw(line);                                    			      
 		}
 	}
 	
@@ -273,12 +292,11 @@ public class DrawVector extends Drawable implements Previewable {
 	}
     
 	final public boolean hit(int x,int y) {        
-        return isVisible && 
-        		(line.intersects(x-3, y-3, 6, 6) || gp.intersects(x-3, y-3, 6, 6));
+        return (lineVisible && line.intersects(x-3, y-3, 6, 6)) || (arrowheadVisible && gp.intersects(x-3, y-3, 6, 6));
     }
 	
 	final public boolean isInside(Rectangle rect) {  
-    	return isVisible && rect.contains(line.getBounds());   
+    	return (lineVisible && rect.contains(line.getBounds())) || (arrowheadVisible && rect.contains(gp.getBounds()));   
     }
 
     
@@ -296,7 +314,11 @@ public class DrawVector extends Drawable implements Previewable {
 	final public Rectangle getBounds() {		
 		if (!geo.isDefined() || !geo.isEuclidianVisible())
 			return null;
-		else 
-			return line.getBounds();	
+		Rectangle ret = null;
+		if (lineVisible) ret = line.getBounds();
+		
+		if (arrowheadVisible) ret = (ret == null) ? gp.getBounds() : ret.union(gp.getBounds());
+		
+		return ret;
 	}
 }

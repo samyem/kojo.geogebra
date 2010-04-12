@@ -2308,7 +2308,7 @@ MouseMotionListener, MouseWheelListener, ComponentListener {
 
 		if (movedGeoNumeric.animationIncrement > Kernel.MIN_PRECISION) {
 			// round to decimal fraction, e.g. 2.800000000001 to 2.8
-			val = kernel.checkDecimalFraction(val);
+			val = kernel.checkDecimalFraction(val, 1 / movedGeoNumeric.animationIncrement);
 		}
 
 		if (movedGeoNumeric.isGeoAngle()) {
@@ -2316,6 +2316,9 @@ MouseMotionListener, MouseWheelListener, ComponentListener {
 				val = 0;
 			else if (val > Kernel.PI_2)
 				val = Kernel.PI_2;
+			
+			val = kernel.checkDecimalFraction(val * Kernel.CONST_180_PI) / Kernel.CONST_180_PI;
+
 		}
 
 		// do not set value unless it really changed!
@@ -3883,7 +3886,7 @@ MouseMotionListener, MouseWheelListener, ComponentListener {
 			return false;
 
 		app.getGuiManager().showBooleanCheckboxCreationDialog(mouseLoc, null);
-		return true;
+		return false;
 	}
 
 	// get (point or line) and (conic or function or curve)
@@ -5342,7 +5345,7 @@ MouseMotionListener, MouseWheelListener, ComponentListener {
 		ToolTipManager ttm = ToolTipManager.sharedInstance();		
 		ttm.setEnabled(false);		
 		ListDialog dialog = new ListDialog(view, geos, null);
-		ret = dialog.showDialog(view, mouseLoc);			
+		if (app.areChooserPopupsEnabled()) ret = dialog.showDialog(view, mouseLoc);			
 		ttm.setEnabled(true);				
 		}
 		return ret;	

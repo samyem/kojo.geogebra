@@ -5,11 +5,13 @@ import geogebra.kernel.GeoElement;
 import geogebra.main.Application;
 
 import java.awt.Color;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 import javax.swing.BorderFactory;
@@ -36,7 +38,7 @@ public class ContextMenu extends JPopupMenu
 	protected Application app;
 	
 	public ContextMenu(MyTable table0, int column01, int row01, int column02, int row02, boolean[] selectedColumns0) {
-		//Application.debug("showPopupMenu <<<<<<<<<<<<<<<<<<<");
+		//Application.printStacktrace("showPopupMenu <<<<<<<<<<<<<<<<<<<");
 		table = table0;
 		column1 = column01;
 		column2 = column02;
@@ -62,6 +64,15 @@ public class ContextMenu extends JPopupMenu
 		
 		//G.Sturr 2009-10-3: Added menu title  
 		ArrayList geos = app.getSelectedGeos();
+		
+		// remove selected geos not in spreadsheet
+		// NB changes 'geos'
+		Iterator it = ((ArrayList)(geos.clone())).iterator();
+		while (it.hasNext()) {
+			GeoElement geo = (GeoElement)(it.next());
+			if (!GeoElement.isSpreadsheetLabel(geo.getLabel()))
+				app.removeSelectedGeo(geo);
+		}
    	 		
    	 	//title = cell range if empty or multiple cell selection
 		String title = GeoElement.getSpreadsheetCellName(column1, row1);
@@ -140,7 +151,6 @@ public class ContextMenu extends JPopupMenu
 	 		if (app.selectedGeosSize() > 0) {
 
 			 	addSeparator();
-	
 			 	JMenuItem item8 = new JMenuItem(app.getMenu(app.getPlain("Properties"))+"...");
 		   	 	item8.setIcon(app.getImageIcon("document-properties.png"));
 		   	 	item8.addActionListener(new ActionListenerProperties());

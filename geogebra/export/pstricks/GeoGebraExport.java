@@ -35,6 +35,7 @@ import geogebra.kernel.GeoText;
 import geogebra.kernel.GeoVec2D;
 import geogebra.kernel.GeoVector;
 import geogebra.kernel.Kernel;
+import geogebra.kernel.arithmetic.ExpressionNode;
 import geogebra.main.Application;
 
 import java.awt.Color;
@@ -141,6 +142,7 @@ public abstract class GeoGebraExport implements ActionListener{
 	public void actionPerformed(ActionEvent e){
 		isBeamer=frame.isBeamer();
 		generateAllCode();
+
 	}
 	/**
 	 * 	This method	converts a double with engineering notation to decimal<br>
