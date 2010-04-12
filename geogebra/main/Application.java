@@ -561,6 +561,10 @@ public abstract class Application implements KeyEventDispatcher {
 		isSaved = false;
 	}
 
+	public void setSaved() {
+		isSaved = true;
+	}
+
 	public boolean isIniting() {
 		return INITING;
 	}
