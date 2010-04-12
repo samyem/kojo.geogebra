@@ -196,13 +196,14 @@ public class AlgoTableText extends AlgoElement {
 			String text = geo1.toLaTeXString(false);
 			if (" ".equals(text) || "".equals(text))
 				text = "\u00a0";	
+			/* removed Michael Borcherds 2010, causes problems with HotEqn
 			// Modify by Loïc Le Coq 2009/12/15
 			if (geo1.isTextValue()){
 				sb.append("\\mathrm{");
 				sb.append(text);
 				sb.append("}");
 			}
-			else 
+			else */
 			sb.append(text);
 			// End Loïc
 		}

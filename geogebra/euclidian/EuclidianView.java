@@ -132,6 +132,10 @@ public class EuclidianView extends JPanel implements View, Printable, EuclidianC
 				new Integer(LINE_TYPE_DASHED_DOTTED) };
 		return ret;
 	}
+		
+	// need to clip just outside the viewing area when drawing eg vectors
+	// as a near-horizontal thick vector isn't drawn correctly otherwise
+	public static final int CLIP_DISTANCE = 5;
 
 	public static final int AXES_LINE_TYPE_FULL = 0;
 
@@ -925,6 +929,15 @@ public class EuclidianView extends JPanel implements View, Printable, EuclidianC
 			
 		return onScreen;
 	}
+	
+	/**
+	 * Checks if (screen) coords are on screen.
+	 * @param coords
+	 * @return
+	 */
+	final public boolean isOnScreen(double [] coords) {
+		return coords[0] >= 0 && coords[0] <= width && coords[1] >=0 && coords[1] <= height;
+	}
 
 	//private static final double MAX_SCREEN_COORD = Float.MAX_VALUE; //10000;
 
@@ -1655,8 +1668,10 @@ public class EuclidianView extends JPanel implements View, Printable, EuclidianC
 		if (showAxes[0] || showAxes[1])
 			drawAxes(g);
 
-		if (app.showResetIcon()) {
-			g.drawImage(getResetImage(), width - 18, 2, null);
+		if (app.showResetIcon() && app.isApplet()) {
+			// need to use getApplet().width rather than width so that
+			// it works with applet rescaling
+			g.drawImage(getResetImage(), app.getApplet().width - 18, 2, null);
 		}
 	}		
 	
@@ -2116,7 +2131,7 @@ public class EuclidianView extends JPanel implements View, Printable, EuclidianC
 	}
 	
 	final boolean hitAnimationButton(MouseEvent e) {
-		return (e.getX() <= 20) && (e.getY() >= height - 20);		
+		return kernel.needToShowAnimationButton() && (e.getX() <= 20) && (e.getY() >= height - 20);		
 	}
 	
 	/**
@@ -3166,6 +3181,39 @@ public class EuclidianView extends JPanel implements View, Printable, EuclidianC
 		zoomer.init(px, py, zoomFactor, steps, storeUndo);
 		zoomer.startAnimation();
 		
+		
+	}
+
+	/**
+	 * Zooms around fixed point (center of screen)
+	 */
+	public final void zoomAroundCenter(double zoomFactor) {
+		
+		// keep xmin, xmax, ymin, ymax constant, adjust everything else
+		
+		xscale *= zoomFactor;
+		yscale *= zoomFactor;
+		
+		scaleRatio = yscale / xscale;
+		invXscale = 1.0d / xscale;
+		invYscale = 1.0d / yscale;
+		
+		xZero = -xmin * xscale;
+		width = (int)(xmax * xscale + xZero);
+		yZero = ymax * yscale;
+		height = (int)(yZero - ymin * yscale);
+		
+		setAxesIntervals(xscale, 0);
+		setAxesIntervals(yscale, 1);
+		calcPrintingScale();
+		
+		// tell kernel
+		kernel.setEuclidianViewBounds(xmin, xmax, ymin, ymax, xscale, yscale);
+
+		coordTransform.setTransform(xscale, 0.0d, 0.0d, -yscale, xZero, yZero);
+
+		updateBackgroundImage();
+		updateAllDrawables(true);
 		
 	}
 

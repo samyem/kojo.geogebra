@@ -45,7 +45,9 @@ implements ExpressionValue {
 	public static final int STRING_TYPE_GEOGEBRA = 1;
 	public static final int STRING_TYPE_JASYMCA = 2;
 	public static final int STRING_TYPE_MATH_PIPER = 3;
-	public static final int STRING_TYPE_LATEX = 100;
+	public static final int STRING_TYPE_LATEX = 4;
+	public static final int STRING_TYPE_PSTRICKS = 5;
+	public static final int STRING_TYPE_PGF = 6;
 	
 	public static final String UNICODE_PREFIX = "uNiCoDe";
 	public static final String UNICODE_DELIMITER = "U";  
@@ -53,17 +55,17 @@ implements ExpressionValue {
 	private static final int NO_OPERATION = Integer.MIN_VALUE; 
     
 	// boolean
-	public static final int NOT_EQUAL = -100;
-	public static final int NOT = -99;
-	public static final int OR = -98;
-    public static final int AND = -97;
-    public static final int EQUAL_BOOLEAN = -96;
-    public static final int LESS = -95;
-    public static final int GREATER = -94;
-    public static final int LESS_EQUAL = -93;
-    public static final int GREATER_EQUAL = -92;    
-    public static final int PARALLEL = -91;  
-    public static final int PERPENDICULAR = -90;
+	public static final int NOT_EQUAL = -11;
+	public static final int NOT = -10;
+	public static final int OR = -9;
+    public static final int AND = -8;
+    public static final int EQUAL_BOOLEAN = -7;
+    public static final int LESS = -6;
+    public static final int GREATER = -5;
+    public static final int LESS_EQUAL = -4;
+    public static final int GREATER_EQUAL = -3;    
+    public static final int PARALLEL = -2;  
+    public static final int PERPENDICULAR = -1;
     
     public static final String strNOT = "\u00ac";
     public static final String strAND = "\u2227";
@@ -113,20 +115,20 @@ implements ExpressionValue {
     public static final int COMPLEXMULTIPLY = 33; // TODO remove
     public static final int VECTORPRODUCT = 33;
      
-    public static final int FUNCTION = 100;
-    public static final int VEC_FUNCTION = 101;
-    public static final int DERIVATIVE = 110;   
+    public static final int FUNCTION = 34;
+    public static final int VEC_FUNCTION = 35;
+    public static final int DERIVATIVE = 36;   
     
     // spreadsheet absolute reference using $ signs
-    public static final int $VAR_ROW = 501;
-    public static final int $VAR_COL = 502;
-    public static final int $VAR_ROW_COL = 503;
+    public static final int $VAR_ROW = 37;
+    public static final int $VAR_COL = 38;
+    public static final int $VAR_ROW_COL = 39;
     
     private Application app;
     private Kernel kernel;
     private ExpressionValue left, right; 
     int operation = NO_OPERATION;
-    private boolean forceVector = false, forcePoint = false;
+    private boolean forceVector = false, forcePoint = false, forceFunction = false;
     
     private boolean holdsLaTeXtext = false;
     
@@ -243,6 +245,7 @@ implements ExpressionValue {
         // set member vars that are not set by constructors
         newNode.forceVector = forceVector;
         newNode.forcePoint = forcePoint;
+        newNode.forceFunction = forceFunction;
         //Application.debug("getCopy() output: " + newNode);   
         return newNode;
     }        
@@ -606,15 +609,40 @@ implements ExpressionValue {
             }     
             // list + vector 
             else if (lt.isListValue() && rt.isVectorValue()) { 
-                vec = ((VectorValue)rt).getVector();
-                GeoVec2D.add(vec, ((ListValue)lt) , vec);                                         
-                return vec;
+            	MyList list = ((ListValue)lt).getMyList();
+            	if (list.size() > 0) {
+	            	ExpressionNode en = list.getListElement(0);
+	            	ExpressionValue ev = en.evaluate();
+	            	if (ev.isNumberValue()) { // eg {1,2} + (1,2) treat as point + point
+		                vec = ((VectorValue)rt).getVector();
+		                GeoVec2D.add(vec, ((ListValue)lt) , vec);                                         
+		                return vec;
+	            	}
+            	}
+            	// not a list with numbers, do list operation
+            	MyList myList = ((ListValue) lt).getMyList();
+            	// list lt operation rt
+            	myList.applyRight(operation, rt);
+            	return myList;
+     
             }     
             // vector + list 
             else if (rt.isListValue() && lt.isVectorValue()) { 
-                vec = ((VectorValue)lt).getVector();
-                GeoVec2D.add(vec, ((ListValue)rt) , vec);                                         
-                return vec;
+            	MyList list = ((ListValue)rt).getMyList();
+            	if (list.size() > 0) {
+	            	ExpressionNode en = list.getListElement(0);
+	            	ExpressionValue ev = en.evaluate();
+	            	if (ev.isNumberValue()) { // eg {1,2} + (1,2) treat as point + point
+	                    vec = ((VectorValue)lt).getVector();
+	                    GeoVec2D.add(vec, ((ListValue)rt) , vec);                                         
+	                    return vec;
+	            	}
+            	}
+            	// not a list with numbers, do list operation
+            	MyList myList = ((ListValue) rt).getMyList();
+            	// lt operation list rt
+            	myList.applyLeft(operation, lt);
+            	return myList;
             }     
             // text concatenation (left)
             else if (lt.isTextValue()) { 
@@ -2118,6 +2146,15 @@ implements ExpressionValue {
     	return forcePoint;
     }
     
+    public void setForceFunction() {
+        // this expression should be considered as a point, not a vector
+        forceFunction = true;
+    }
+    
+    final public boolean isForcedFunction() {
+    	return forceFunction;
+    }
+    
     /** 
      * Returns whether this tree has any operations
      */
@@ -2563,32 +2600,30 @@ implements ExpressionValue {
 	                    break;
 	                    
 	                default:
-	                	// TODO: remove
-//	                	System.out.println("PLUS: left: " + leftStr + " " + isEqualString(left, 0, !valueForm) +
-//	                			", right: " + isEqualString(left, 0, !valueForm) + " " + rightStr);
-	                	
 	                    // check for 0
-            			if (isEqualString(left, 0, !valueForm)) {
-		            		if (right.isLeaf() || opID(right) >= PLUS) {
-	        					sb.append(rightStr);
-	        				} else {
-	        					sb.append('(');
-	    	                    sb.append(rightStr);
-	    	                    sb.append(')'); 
-	        				}
-        		    		break;
-            			} 
-            			else if (isEqualString(right, 0, !valueForm)) {
-            				if (left.isLeaf() || opID(left) >= PLUS) {
-	        					sb.append(leftStr);
-	        				} else {
-	        					sb.append('(');
-	    	                    sb.append(leftStr);
-	    	                    sb.append(')'); 
-	        				}
-        		    		break;
-            			}
-	                	            			
+	                	if (valueForm) {
+	            			if (isEqualString(left, 0, !valueForm)) {
+			            		if (right.isLeaf() || opID(right) >= PLUS) {
+		        					sb.append(rightStr);
+		        				} else {
+		        					sb.append('(');
+		    	                    sb.append(rightStr);
+		    	                    sb.append(')'); 
+		        				}
+	        		    		break;
+	            			} 
+	            			else if (isEqualString(right, 0, !valueForm)) {
+	            				if (left.isLeaf() || opID(left) >= PLUS) {
+		        					sb.append(leftStr);
+		        				} else {
+		        					sb.append('(');
+		    	                    sb.append(leftStr);
+		    	                    sb.append(')'); 
+		        				}
+	        		    		break;
+	            			}
+	                	}
+	               
 	                	// we need parantheses around right text
 	                	// if right is not a leaf expression or
 	                	// it is a leaf GeoElement without a label (i.e. it is calculated somehow)        
@@ -2629,14 +2664,13 @@ implements ExpressionValue {
 	                    break;
 	                    
 	                default:
-		                sb.append(leftStr);   
-		                
+	                	sb.append(leftStr);
+	                	
 		                // check for 0 at right
-	        			if (rightStr.equals("0")) {
+	        			if (valueForm && rightStr.equals("0")) {
 	    		    		break;
 	        			}
-		                
-		                
+
 		                if (right.isLeaf() || opID(right) >= MULTIPLY) { // not +, -                    
 		                    if (rightStr.charAt(0) == '-') { // convert - - to +
 		                        sb.append(" + ");
@@ -2766,7 +2800,9 @@ implements ExpressionValue {
 	                } else {
 	                    if (nounary) {
 	                    	switch (STRING_TYPE) {
-	                			case STRING_TYPE_GEOGEBRA_XML:
+                			case STRING_TYPE_GEOGEBRA_XML:
+                			case STRING_TYPE_PGF:
+                			case STRING_TYPE_PSTRICKS:
 	                				sb.append(" * ");  
 	                				break;
 	                				
@@ -2975,6 +3011,10 @@ implements ExpressionValue {
             			sb.append("Cos(");
             			break;
             			
+        			case STRING_TYPE_PSTRICKS:
+	        			sb.append("COS(");  
+	                	break;
+        			
             		default:
             			sb.append("cos(");         		
             	}    		
@@ -2992,6 +3032,10 @@ implements ExpressionValue {
 	        			sb.append("Sin(");
 	        			break;
 	        			
+        			case STRING_TYPE_PSTRICKS:
+	        			sb.append("SIN(");  
+	                	break;
+        			
 	        		default:
 	        			sb.append("sin(");         		
 	        	}           		
@@ -3009,6 +3053,10 @@ implements ExpressionValue {
 	        			sb.append("Tan(");
 	        			break;
 	        			
+        			case STRING_TYPE_PSTRICKS:
+	        			sb.append("TAN(");  
+	                	break;
+        			
 	        		default:
 	        			sb.append("tan(");         		
 	        	}            		
@@ -3026,6 +3074,10 @@ implements ExpressionValue {
 	        			sb.append("ArcCos(");
 	        			break;
 	        			
+        			case STRING_TYPE_PSTRICKS:
+	        			sb.append("ACOS(");  
+	                	break;
+        			
 	        		default:
 	        			sb.append("acos(");         		
 	        	}  	             	
@@ -3043,6 +3095,10 @@ implements ExpressionValue {
 	        			sb.append("ArcSin(");
 	        			break;
 	        			
+        			case STRING_TYPE_PSTRICKS:
+	        			sb.append("ASIN(");  
+	                	break;
+        			
 	        		default:
 	        			sb.append("asin(");         		
 	        	}  	   
@@ -3060,6 +3116,10 @@ implements ExpressionValue {
 	        			sb.append("ArcTan(");
 	        			break;
 	        			
+        			case STRING_TYPE_PSTRICKS:
+	        			sb.append("ATAN(");  
+	                	break;
+        			
 	        		default:
 	        			sb.append("atan(");         		
 	        	}  	        	      
@@ -3077,6 +3137,10 @@ implements ExpressionValue {
 	        			sb.append("Cosh(");
 	        			break;
 	        			
+        			case STRING_TYPE_PSTRICKS:
+	        			sb.append("COSH(");  
+	                	break;
+        			
 	        		default:
 	        			sb.append("cosh(");         		
 	        	}  	         	       		                
@@ -3094,6 +3158,10 @@ implements ExpressionValue {
 	        			sb.append("Sinh(");
 	        			break;
 	        			
+        			case STRING_TYPE_PSTRICKS:
+	        			sb.append("SINH(");  
+	                	break;
+        			
 	        		default:
 	        			sb.append("sinh(");         		
 	        	}    		                 
@@ -3111,6 +3179,10 @@ implements ExpressionValue {
 	        			sb.append("Tanh(");
 	        			break;
 	        			
+        			case STRING_TYPE_PSTRICKS:
+	        			sb.append("TANH(");  
+	                	break;
+        			
 	        		default:
 	        			sb.append("tanh(");         		
 	        	}    	
@@ -3128,6 +3200,10 @@ implements ExpressionValue {
 	        			sb.append("ArcCosh(");
 	        			break;
 	        			
+        			case STRING_TYPE_PSTRICKS:
+	        			sb.append("ACOSH(");  
+	                	break;
+        			
 	        		default:
 	        			sb.append("acosh(");         		
 	        	}           	        	            	
@@ -3145,6 +3221,10 @@ implements ExpressionValue {
 	        			sb.append("ArcSinh(");
 	        			break;
 	        			
+        			case STRING_TYPE_PSTRICKS:
+	        			sb.append("ASINH(");  
+	                	break;
+        			
 	        		default:
 	        			sb.append("asinh(");         		
 	        	}               	
@@ -3162,6 +3242,10 @@ implements ExpressionValue {
 	        			sb.append("ArcTanh(");
 	        			break;
 	        			
+        			case STRING_TYPE_PSTRICKS:
+	        			sb.append("ATANH(");  
+	                	break;
+        			
 	        		default:
 	        			sb.append("atanh(");         		
 	        	}      
@@ -3177,6 +3261,12 @@ implements ExpressionValue {
 	        			 sb.append('}');
 	        			break;
 	        			
+        			case STRING_TYPE_PSTRICKS:
+	        			sb.append("EXP(");  
+	        			sb.append(leftStr);
+	        			sb.append(')');
+	                	break;
+        			
 	        		case STRING_TYPE_MATH_PIPER:
 	        			sb.append("Exp(");
 	        			sb.append(leftStr);
@@ -3219,6 +3309,8 @@ implements ExpressionValue {
 	        			sb.append("log(");	        			
 	        			break;
 	        			
+        			case STRING_TYPE_PSTRICKS:		
+        			case STRING_TYPE_PGF:
 	        		default:
 	        			sb.append("ln("); 
 	        			break;
@@ -3229,12 +3321,24 @@ implements ExpressionValue {
                 
             case LOG10:
             	switch (STRING_TYPE) {
-	        		case STRING_TYPE_LATEX:
+        			case STRING_TYPE_LATEX:
 	        			sb.append("\\log_{10}(");
 	        			sb.append(leftStr);
 	                    sb.append(')');
 	        			break;
-	        			
+        			
+        			case STRING_TYPE_PSTRICKS:
+	        			sb.append("log(");  
+	        			sb.append(leftStr);
+	        			sb.append(')');
+	                	break;
+        			
+        			case STRING_TYPE_PGF:
+	        			sb.append("log10(");  
+	        			sb.append(leftStr);
+	        			sb.append(')');
+	                	break;
+        			
 	        		case STRING_TYPE_MATH_PIPER:
 	        			sb.append("Ln(");
 	        			sb.append(leftStr);
@@ -3402,6 +3506,12 @@ implements ExpressionValue {
 		                sb.append(')');
 	        			break;
 	        			
+        			case STRING_TYPE_PSTRICKS:
+	        			sb.append("ceiling(");  
+	        			sb.append(leftStr);
+	        			sb.append(')');
+	                	break;
+
 	        		default:
 	        			sb.append("ceil(");  
 		        		sb.append(leftStr);

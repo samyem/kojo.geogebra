@@ -23,11 +23,13 @@ import geogebra.plugin.GgbAPI;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
@@ -68,9 +70,11 @@ public abstract class AppletImplementation implements AppletImplementationInterf
 	public boolean showOpenButton, undoActive;
 	public boolean showToolBar, showToolBarHelp, showAlgebraInput;
 	public boolean enableRightClick = true;
+	public boolean enableChooserPopups = true;
 	public boolean errorDialogsActive = true;
 	public boolean enableLabelDrags = true;
 	boolean enableShiftDragZoom = true;
+	boolean allowRescaling = true;
 	public boolean showMenuBar = false;
 	//public boolean showSpreadsheet = false;
 	//public boolean showAlgebraView = false;
@@ -81,6 +85,7 @@ public abstract class AppletImplementation implements AppletImplementationInterf
 	public boolean showFrame = true;
 	private JFrame wnd;
 	private JSObject browserWindow;
+	public int width, height;
 	//public static URL codeBase=null;
 	//public static URL documentBase=null;
 	
@@ -94,6 +99,29 @@ public abstract class AppletImplementation implements AppletImplementationInterf
 	/** Creates a new instance of GeoGebraApplet */	
 	protected AppletImplementation(JApplet applet) {
 		this.applet = applet;
+
+		// Allow rescaling eg ctrl+ ctrl- in Firefox
+		if (allowRescaling)	applet.addComponentListener(new java.awt.event.ComponentAdapter() {
+			public void componentResized(ComponentEvent e)
+			{
+				Component c = e.getComponent();
+				Application.debug("Applet resized to: "+c.getWidth()+", "+c.getHeight());
+				
+				if (!app.runningInFrame && app.onlyGraphicsViewShowing())
+				{
+					// use just horizontal scale factors
+					// under normal circumstances, these should be the same			
+					double zoomFactor = (double)c.getWidth() / (double)width;// (double)c.getHeight() / (double)height ;
+					app.getEuclidianView().zoomAroundCenter(zoomFactor);
+
+				}
+				
+				width = c.getWidth();
+				height = c.getHeight();
+				
+			}
+		   }); 
+
 		init();
 	}
 	
@@ -219,6 +247,9 @@ public abstract class AppletImplementation implements AppletImplementationInterf
 		// rightClickActive, default is "true"
 		enableRightClick = !"false".equals(applet.getParameter("enableRightClick"));
 		
+		// enableChooserPopups, default is "true"
+		enableChooserPopups = !"false".equals(applet.getParameter("enableChooserPopups"));
+		
 		// errorDialogsActive, default is "true"
 		errorDialogsActive = !"false".equals(applet.getParameter("errorDialogsActive"));
 		
@@ -230,6 +261,9 @@ public abstract class AppletImplementation implements AppletImplementationInterf
 		
 		// enableShiftDragZoom, default is "true"
 		enableShiftDragZoom = !"false".equals(applet.getParameter("enableShiftDragZoom"));		
+		
+		// allowRescaling, default is "false"
+		allowRescaling = "true".equals(applet.getParameter("allowRescaling"));		
 		
 		undoActive = (showToolBar || showMenuBar);
 		
@@ -344,9 +378,36 @@ public abstract class AppletImplementation implements AppletImplementationInterf
 		cp.removeAll();
 		cp.add(myContenPane);
 		
+		Application.debug("Initial size = "+cp.getWidth()+", "+cp.getHeight());
+		//Application.debug("Preferred size = "+app.getEuclidianView().getPreferredSize().getWidth()+", "+app.getEuclidianView().getPreferredSize().getHeight());
+		
+		width = cp.getWidth();
+		height = cp.getHeight();	
+		
+		setInitialScaling();
+		
 		// set move mode
 		app.setMoveMode();			
 	}
+	
+	/*
+	 * rescales if the width is not what's expected
+	 * eg if browser is zoomed
+	 */
+	private void setInitialScaling() {
+		if (allowRescaling) {			
+			if (!app.runningInFrame && app.onlyGraphicsViewShowing())
+			{
+				double zoomFactorX = (double)width / (double)app.getEuclidianView().getPreferredSize().getWidth();
+				double zoomFactorY = (double)height / (double)app.getEuclidianView().getPreferredSize().getHeight();
+				double zoomFactor = Math.min(zoomFactorX, zoomFactorY);
+				app.getEuclidianView().zoomAroundCenter(zoomFactor);
+			}
+		}
+
+	}
+
+
 	
 //	/**
 //	 * Initializes the user interface to only show the graphics view.
@@ -393,6 +454,7 @@ public abstract class AppletImplementation implements AppletImplementationInterf
 		app.setShowAlgebraInput(showAlgebraInput);
 		app.setShowToolBar(showToolBar, showToolBarHelp);	
 		app.setRightClickEnabled(enableRightClick);
+		app.setChooserPopupsEnabled(enableChooserPopups);
 		app.setErrorDialogsActive(errorDialogsActive);
 		app.setLabelDragsEnabled(enableLabelDrags);
 		app.setShiftDragZoomEnabled(enableShiftDragZoom);
@@ -726,7 +788,6 @@ public abstract class AppletImplementation implements AppletImplementationInterf
 
 			}
 		});
-
 	}
 	
 	/**
@@ -1095,7 +1156,7 @@ public abstract class AppletImplementation implements AppletImplementationInterf
 	 * Shows or hides the x- and y-axis of the coordinate system in the graphics window.
 	 */
 	public synchronized void setAxesVisible(boolean xVisible, boolean yVisible) {		
-		app.getEuclidianView().showAxes(xVisible, yVisible);
+		ggbApi.setAxesVisible(xVisible, yVisible);
 	}	
 	
 	/**

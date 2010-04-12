@@ -446,7 +446,7 @@ public class WorksheetExportDialog extends JDialog {
 		
 		// right column
 		// save, print
-		cbSavePrint = new JCheckBox(app.getMenu("Save") + ", " + app.getMenu("Print"));
+		cbSavePrint = new JCheckBox(app.getMenu("Save") + ", " + app.getMenu("Print") + ", " + app.getMenu("Undo"));
 		guiPanelEast.add(cbSavePrint);
 		// showToolBarHelp				
 		cbShowToolBarHelp = new JCheckBox(app.getMenu("ShowToolBarHelp"));
@@ -812,34 +812,13 @@ public class WorksheetExportDialog extends JDialog {
 		sb.append("\" author_email=\"xxx@google.com\" ");
 		sb.append("description=\"GeoGebra applet as a Google-Site gadget\" thumbnail=\"http://www.geogebra.org/static/images/geogebra_logo67x60.png\">\n");
 		sb.append("</ModulePrefs>\n");
+		
 		sb.append("<Content type=\"html\">\n");
 		sb.append("<![CDATA[\n");
-		sb.append("<script src=\"http://java.com/js/deployJava.js\">\n");
-		sb.append("</script>\n");
 		sb.append("<div id='ggbapplet'>\n");
-		sb.append("<script>\n");
-		sb.append("var jarUrl = \"geogebra.jar\";\n");
-		//sb.append("var cachedJarUrl = _IG_GetCachedUrl(jarUrl);\n");
-
 		
-		sb.append("deployJava.runApplet({archive:jarUrl, name:\"ggbApplet\", code:\"geogebra.GeoGebraApplet\", codebase:\"");
-		sb.append(GeoGebra.GEOGEBRA_ONLINE_ARCHIVE_BASE);
-		sb.append("unsigned/");
-		sb.append("\", width:\"");
-		sb.append(sizePanel.getSelectedWidth());
-		sb.append("\", height:\"");
-		sb.append(sizePanel.getSelectedHeight());
-		sb.append("\",\n");
-		//sb.append("filename:\"xxx.ggb\",");
-		sb.append("ggbBase64:\"");
-		appendBase64(sb);
-		sb.append("\",\n");
-		//sb.append("java_arguments:\"-Xmx256m\", framePossible:\"true\", showResetIcon:\"true\", showAnimationButton:\"true\", enableRightClick:\"false\", enableLabelDrags:\"true\", showMenuBar:\"false\", showToolBar:\"false\", showToolBarHelp:\"false\", showAlgebraInput:\"false\"});\n");
-		appendGgbAppletParameters(sb, TYPE_GOOGLEGADGET);			
-		sb.setLength(sb.lastIndexOf(",")); // remove last comma
-		sb.append("});\n");
+		sb.append(getAppletTag(null, sizePanel.getSelectedWidth(), sizePanel.getSelectedHeight()));
 
-		sb.append("</script>\n");
 		sb.append("</div>\n");
 		sb.append("]]>\n");
 		sb.append("</Content>\n");
@@ -848,7 +827,7 @@ public class WorksheetExportDialog extends JDialog {
 		return sb.toString();
 		
 	}
-
+	
 	/**
 	 * Returns a html page with the applet included
 	 * 
@@ -997,7 +976,7 @@ public class WorksheetExportDialog extends JDialog {
 		// add MAYSCRIPT to ensure ggbOnInit() can be called
 		sb.append("\" MAYSCRIPT>\n");
 
-		if (cbOfflineArchiveAndGgbFile.isSelected()) {
+		if (cbOfflineArchiveAndGgbFile.isSelected() && ggbFile != null) {
 			// ggb file
 			sb.append("\t<param name=\"filename\" value=\"");
 			sb.append(ggbFile.getName());
@@ -1101,6 +1080,9 @@ public class WorksheetExportDialog extends JDialog {
 		
 		// showAlgebraInput
 		appletParam(sb, "showAlgebraInput", cbShowInputField.isSelected(), type);
+		
+		// allowRescaling
+		appletParam(sb, "allowRescaling", true, type);
 		
 	}
 	

@@ -5140,6 +5140,8 @@ class ShowConditionPanel
 		} else {
 			
 			// needed to make next replace easier
+			strCond = strCond.replaceAll(">=", ExpressionNode.strGREATER_EQUAL);
+			strCond = strCond.replaceAll("<=", ExpressionNode.strLESS_EQUAL);
 			strCond = strCond.replaceAll("==", ExpressionNode.strEQUAL_BOOLEAN);
 			strCond = strCond.replaceAll("!=", ExpressionNode.strNOT_EQUAL);
 			
