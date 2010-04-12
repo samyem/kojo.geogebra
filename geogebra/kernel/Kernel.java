@@ -1774,6 +1774,17 @@ public class Kernel {
 		return t;
 	}
 
+	/** 
+	 * Text of geo.
+	 */
+	final public GeoText Text(
+		String label,
+		GeoElement geo, GeoPoint p, GeoBoolean substituteVars, GeoBoolean latex) {
+		AlgoText algo = new AlgoText(cons, label, geo, p, substituteVars, latex);
+		GeoText t = algo.getGeoText();
+		return t;
+	}
+	
 	/**
 	 * Row of geo.
 	 */
@@ -4963,7 +4974,14 @@ public class Kernel {
 		return true;
 	}
 
+	/**
+	 * Converts val to a value between 0 and 2pi.
+	 * @param val
+	 * @return
+	 */
 	final public double convertToAngleValue(double val) {
+		if (val > EPSILON && val < PI_2) return val;
+		
 		double value = val % PI_2;
 		if (isZero(value)) {
 			if (val < 1.0)
@@ -5367,8 +5385,11 @@ public class Kernel {
 	 * Uses current NumberFormat nf to format a number.
 	 */
 	final private String formatNF(double x) {
-		if (-PRINT_PRECISION < x && x < PRINT_PRECISION) {
-			// avoid output of "-0"
+		// "<=" catches -0.0000000000000005
+		// should be rounded to -0.000000000000001 (15 d.p.)
+		// but nf.format(x) returns "-0" 
+		if (-PRINT_PRECISION / 2 <= x && x < PRINT_PRECISION / 2) {
+			// avoid output of "-0" for eg -0.0004
 			return "0";
 		} else {
 			// standard case
@@ -5511,13 +5532,18 @@ public class Kernel {
 	private StringBuffer sbFormatSigned = new StringBuffer(40);
 
 	final public StringBuffer formatAngle(double phi) {
+		return formatAngle(phi, 10);
+	}
+	
+	final public StringBuffer formatAngle(double phi, double precision) {
 		sbFormatAngle.setLength(0);
 		switch (casPrintForm) {
 		case ExpressionNode.STRING_TYPE_MATH_PIPER:
 		case ExpressionNode.STRING_TYPE_JASYMCA:
 			if (angleUnit == ANGLE_DEGREE) {
 				sbFormatAngle.append("(");
-				sbFormatAngle.append(format(Math.toDegrees(phi)));
+				// STANDARD_PRECISION * 10 as we need a little leeway as we've converted from radians
+				sbFormatAngle.append(format(checkDecimalFraction(Math.toDegrees(phi), precision)));
 				sbFormatAngle.append("*");
 				sbFormatAngle.append("\u00b0");
 				sbFormatAngle.append(")");
@@ -5541,7 +5567,8 @@ public class Kernel {
 					phi += 360;
 				else if (phi > 360)
 					phi = phi % 360;
-				sbFormatAngle.append(format(phi));
+				// STANDARD_PRECISION * 10 as we need a little leeway as we've converted from radians
+				sbFormatAngle.append(format(checkDecimalFraction(phi, precision)));
 
 				if (casPrintForm == ExpressionNode.STRING_TYPE_GEOGEBRA_XML) {
 					sbFormatAngle.append("*");
@@ -5617,13 +5644,22 @@ public class Kernel {
 	 * 2.800000000000001. If it is, the decimal fraction eg 2.8 is returned,
 	 * otherwise x is returned.
 	 */
-	final public double checkDecimalFraction(double x) {
+	final public double checkDecimalFraction(double x, double precision) {
+		
+		//Application.debug(precision+" ");
+		precision = Math.pow(10, Math.floor(Math.log(Math.abs(precision))/Math.log(10)));
+		
 		double fracVal = x * INV_MIN_PRECISION;
 		double roundVal = Math.round(fracVal);
-		if (isEqual(fracVal, roundVal))
+		//Application.debug(precision+" "+x+" "+fracVal+" "+roundVal+" "+isEqual(fracVal, roundVal, precision)+" "+roundVal / INV_MIN_PRECISION);
+		if (isEqual(fracVal, roundVal, STANDARD_PRECISION * precision))
 			return roundVal / INV_MIN_PRECISION;
 		else
 			return x;
+	}
+	
+	final public double checkDecimalFraction(double x) {
+		return checkDecimalFraction(x, 1);
 	}
 
 	/**
@@ -5776,7 +5812,7 @@ public class Kernel {
 
 	final public void udpateNeedToShowAnimationButton() {
 		if (animationManager != null)
-			animationManager.udpateNeedToShowAnimationButton();
+			animationManager.updateNeedToShowAnimationButton();
 
 	}
 

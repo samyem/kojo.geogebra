@@ -753,6 +753,10 @@ public class MyTable extends JTable
 					changeSelection((int) p.getY(), (int) p.getX(),false, false );
 					selectionChanged();		
 				}
+				
+				// make sure cell that has been clicked on in selected
+				GeoElement geo = kernel.getGeoAt(p.x, p.y);
+				app.addSelectedGeo(geo);
 				 					
 				ContextMenu popupMenu = new ContextMenu(MyTable.this, minSelectionColumn, minSelectionRow, 
 						maxSelectionColumn, maxSelectionRow, selectedColumns);

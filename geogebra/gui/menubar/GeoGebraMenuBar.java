@@ -58,6 +58,10 @@ public class GeoGebraMenuBar extends MenubarImpl implements Menubar, ActionListe
 				kernel.setPrintDecimals(decimals);				
 				kernel.updateConstruction();
 				app.refreshViews();
+				
+				// see ticket 79
+				kernel.updateConstruction();
+				
 				app.setUnsaved();
 				app.storeUndoInfo();
 			} catch (Exception e) {
@@ -75,6 +79,10 @@ public class GeoGebraMenuBar extends MenubarImpl implements Menubar, ActionListe
 				kernel.setPrintFigures(figures);
 				kernel.updateConstruction();
 				app.refreshViews();
+				
+				// see ticket 79
+				kernel.updateConstruction();
+				
 				app.setUnsaved();
 				app.storeUndoInfo();
 			} catch (Exception e) {

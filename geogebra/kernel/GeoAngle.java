@@ -144,25 +144,16 @@ public final class GeoAngle extends GeoNumeric {
 		}
 	}
 
-	// Michael Borcherds 2007-10-21 BEGIN
+
 	/**
 	 * Sets the value of this angle. Every value is limited between 0 and 2pi.
 	 * Under some conditions a value > pi will be changed to (2pi - value).
 	 * 
 	 * @see setAngleStyle()
 	 */
-	public void setValue(double val) {
+	void setValue(double val, boolean changeAnimationValue) {
 		double angVal = calcAngleValue(val);
-		super.setValue(angVal);
-	}
-	
-	/**
-	 * Sets the value of this angle without changing the animationValue. Needed
-	 * for animations.
-	 */
-	public void doSetValue(double x) {
-		double angVal = calcAngleValue(x);
-		super.doSetValue(angVal);
+		super.setValue(angVal, changeAnimationValue);
 	}
 	
 	/**
@@ -193,8 +184,6 @@ public final class GeoAngle extends GeoNumeric {
 		
 		return angVal;
 	}
-
-	// Michael Borcherds 2007-10-21 END
 
 	public void setIntervalMax(double max) {
 		if (max > Kernel.PI_2)
@@ -331,7 +320,7 @@ public final class GeoAngle extends GeoNumeric {
 	// Michael Borcherds 2007-10-21 END	
 
 	final public String toValueString() {
-		return kernel.formatAngle(value).toString();
+		return isEuclidianVisible() ? kernel.formatAngle(value, 1/animationIncrement).toString() : kernel.formatAngle(value).toString();
 	}
 
 	// overwrite

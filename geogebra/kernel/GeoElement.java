@@ -21,6 +21,7 @@ package geogebra.kernel;
 import geogebra.euclidian.EuclidianView;
 import geogebra.kernel.arithmetic.ExpressionValue;
 import geogebra.kernel.arithmetic.NumberValue;
+import geogebra.main.Application;
 import geogebra.main.MyError;
 import geogebra.util.Util;
 
@@ -2560,7 +2561,7 @@ public abstract class GeoElement
 	
 	public String addLabelTextOrHTML(String desc) {
 		String ret; 
-		if (desc.startsWith(label)) {
+		if (desc.startsWith(label+" ")) {
 			ret = desc;
 		} else {
 			StringBuffer sb = new StringBuffer();

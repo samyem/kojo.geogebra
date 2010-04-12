@@ -19,8 +19,8 @@ import java.net.URL;
 public class GeoGebra extends Object {
 	
 	// GeoGebra version
-	public static final String BUILD_DATE = "January 16, 2010";
-	public static final String VERSION_STRING = "3.2.39.0";
+	public static final String BUILD_DATE = "April 03, 2010";
+	public static final String VERSION_STRING = "3.2.41.1";
 	public static final String SHORT_VERSION_STRING = "3.2"; // used for online archive
 		
 	// File format versions
@@ -29,7 +29,7 @@ public class GeoGebra extends Object {
 	
 	// pre-releases and I2G
 	public static final boolean IS_PRE_RELEASE = !VERSION_STRING.endsWith(".0");
-	public static final boolean DISABLE_I2G = !IS_PRE_RELEASE;
+	public static final boolean DISABLE_I2G = true;
 
 	// URLs
 	public final static String GEOGEBRA_ONLINE_ARCHIVE_BASE = "http://www.geogebra.org/webstart/" + SHORT_VERSION_STRING +"/";
@@ -40,8 +40,16 @@ public class GeoGebra extends Object {
 	public final static int MAX_HEAP_SPACE = 512;
 	
     public static void main(String[] args) {  
+
+    	Frame splashFrame = null;
+    	boolean showSplash = true;
+    	for (int i = 0 ; i < args.length ; i++) {
+    		if (args[i].equals("--showSplash=false")) showSplash = false;
+    		else if (args[i].equals("--help")) showSplash = false;
+    	}
+    	
+    	if (showSplash) {
     	  // Show splash screen
-		  Frame splashFrame = null;
 		  URL imageURL = GeoGebra.class.getResource("/geogebra/splash.png");
 		  if (imageURL != null) {
 		      splashFrame = SplashWindow.splash(
@@ -50,6 +58,7 @@ public class GeoGebra extends Object {
 		  } else {
 		      System.err.println("Splash image not found");
 		  }
+    	}
 		  
 		  // Start GeoGebra
 		  try {        			  		

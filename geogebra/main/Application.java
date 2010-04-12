@@ -165,10 +165,7 @@ public abstract class Application implements KeyEventDispatcher {
 		supportedLocales.add(new Locale("pt", "BR")); // Portugese (Brazil)
 		supportedLocales.add(new Locale("pt", "PT")); // Portuguese (Portugal)
 		// supportedLocales.add(new Locale("pa")); // Punjabi
-		// TODO: remove IS_PRE_RELEASE
-		if (GeoGebra.IS_PRE_RELEASE)
-			supportedLocales.add(new Locale("ro")); // Romanian
-		
+		supportedLocales.add(new Locale("ro")); // Romanian
 		supportedLocales.add(new Locale("ru")); // Russian
 		supportedLocales.add(new Locale("sr")); // Serbian
 		// TODO: remove IS_PRE_RELEASE
@@ -295,6 +292,8 @@ public abstract class Application implements KeyEventDispatcher {
 			rbsettings;
 	private ImageManager imageManager;
 	private int maxIconSize = DEFAULT_ICON_SIZE;
+	
+	public boolean runningOnSugar = false;
 
 	// Hashtable for translation of commands from
 	// local language to internal name
@@ -315,12 +314,11 @@ public abstract class Application implements KeyEventDispatcher {
 	private boolean showGrid = false;
 	private boolean antialiasing = true;
 	private boolean showSpreadsheet = false;
-	private boolean showCAS = false;
-	private boolean disableUndo = false;
 	private boolean printScaleString = false;
 	private int labelingStyle = ConstructionDefaults.LABEL_VISIBLE_AUTOMATIC;
 
 	private boolean rightClickEnabled = true;
+	private boolean chooserPopupsEnabled = true;
 	private boolean labelDragsEnabled = true;
 	private boolean shiftDragZoomEnabled = true;
 	private boolean isErrorDialogsActive = true;
@@ -831,14 +829,17 @@ public abstract class Application implements KeyEventDispatcher {
 								.println("Usage: java -jar geogebra.jar [OPTION] [FILE]\n"
 										+ "Start GeoGebra with the specified OPTIONs and open the given FILE.\n"
 										+ "  --help\t\tprint this message\n"
-										+ "  --language=LANGUGE_CODE\t\tset language using locale strings, e.g. en, de, de_AT, ...\n"
+										+ "  --language=LANGUAGE_CODE\t\tset language using locale strings, e.g. en, de, de_AT, ...\n"
 										+ "  --showAlgebraInput=BOOLEAN\tshow/hide algebra input field\n"
 										+ "  --showAlgebraWindow=BOOLEAN\tshow/hide algebra window\n"
 										+ "  --showSpreadsheet=BOOLEAN\tshow/hide spreadsheet\n"
-										+ "  --showCAS=BOOLEAN\tshow/hide CAS window\n"
+										+ "  --fontSize=NUMBER\tset default font size\n"
+										+ "  --sugar\n"
+										+ "  --showSplash=BOOLEAN\tenable/disable the splash screen\n"
 										+ "  --enableUndo=BOOLEAN\tenable/disable Undo\n"
-										+ "  --showAxes=BOOLEAN\tshow/hide coordinate axes"
-										+ "  --antiAliasing=BOOLEAN\tturn anti-aliasing on/off");
+										+ "  --showAxes=BOOLEAN\tshow/hide coordinate axes\n"
+										+ "  --antiAliasing=BOOLEAN\tturn anti-aliasing on/off\n");
+					System.exit(0);
 					} else if (optionName.equals("language")) {
 						setLocale(getLocale(optionValue));
 
@@ -850,8 +851,10 @@ public abstract class Application implements KeyEventDispatcher {
 						setShowAlgebraView(!optionValue.equals("false"));
 					} else if (optionName.equals("showSpreadsheet")) {
 						setShowSpreadsheetView(!optionValue.equals("false"));
-					} else if (optionName.equals("showCAS")) {
-						setShowCasView(!optionValue.equals("false"));
+					} else if (optionName.equals("fontSize")) {
+						setFontSize(Integer.parseInt(optionValue));
+					} else if (optionName.equals("sugar")) {
+						runningOnSugar=true;
 					} else if (optionName.equals("enableUndo")) {
 						setUndoActive(!optionValue.equals("false"));
 					} else if (optionName.equals("showAxes")) {
@@ -1954,77 +1957,6 @@ public abstract class Application implements KeyEventDispatcher {
 		isSaved = false;
 	}
 
-	public boolean showCasView() {
-		return showCAS;
-	}
-
-	public void setShowCasView(boolean flag) {
-		if (showCAS == flag)
-			return;
-		showCAS = flag;
-
-		if (casView == null) {
-
-			getCasView();
-
-			// create JFrame for CAS view
-			casFrame = createCasFrame(casView);
-		}
-
-		// show or hide CAS window
-
-		casFrame.setVisible(showCAS);
-
-		updateMenubar();
-		isSaved = false;
-	}
-
-	private JFrame casFrame;
-
-	public CasManager getCasView() {
-		if (casView == null) {
-
-			// this code wraps the creation of the cas view and is
-			// necessary to allow dynamic loading of this class
-			ActionListener al = new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					// casView = new
-					// geogebra.cas.view.CASView(Application.this);
-				}
-			};
-			al.actionPerformed(null);
-		}
-
-		return casView;
-	}
-
-	public boolean hasCasView() {
-		return casView != null;
-	}
-
-	private static JFrame createCasFrame(final CasManager casView) {
-		JFrame spFrame = new JFrame();
-
-		JComponent casViewComp = casView.getCASViewComponent();
-
-		// Button
-		JPanel btPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		btPanel.add(casView.createButton(casViewComp, 0));
-		btPanel.add(casView.createButton(casViewComp, 1));
-		btPanel.add(casView.createButton(casViewComp, 2));
-		btPanel.add(casView.createButton(casViewComp, 3));
-
-		Container contentPane = spFrame.getContentPane();
-		contentPane.setLayout(new BorderLayout());
-		contentPane.add(btPanel, BorderLayout.NORTH);
-		contentPane.add(casViewComp, BorderLayout.CENTER);
-		spFrame.setBackground(Color.white);
-		spFrame.setResizable(true);
-		spFrame.setTitle("GeoGebra CAS");
-		spFrame.pack();
-		return spFrame;
-	}
-
 	final public boolean showAlgebraView() {
 		return showAlgebraView;
 	}
@@ -2137,6 +2069,14 @@ public abstract class Application implements KeyEventDispatcher {
 	}
 
 	/**
+	 * Enables or disables popups when multiple objects selected This is useful
+	 * for applets.
+	 */
+	public void setChooserPopupsEnabled(boolean flag) {
+		chooserPopupsEnabled = flag;
+	}
+	
+	/**
 	 * Enables or disables label dragging in this application. This is useful
 	 * for applets.
 	 */
@@ -2146,6 +2086,10 @@ public abstract class Application implements KeyEventDispatcher {
 
 	final public boolean isRightClickEnabled() {
 		return rightClickEnabled;
+	}
+
+	final public boolean areChooserPopupsEnabled() {
+		return chooserPopupsEnabled;
 	}
 
 	final public boolean isLabelDragsEnabled() {
@@ -3436,10 +3380,6 @@ public abstract class Application implements KeyEventDispatcher {
 		return commandDict;
 	}
 
-	public JFrame getCasFrame() {
-		return casFrame;
-	}
-
 	final static int MEMORY_CRITICAL = 100 * 1024;
 	static Runtime runtime = Runtime.getRuntime();
 
@@ -3546,6 +3486,15 @@ public abstract class Application implements KeyEventDispatcher {
 					image, new Point(0, 0), "invisibleCursor");
 		}
 		return transparentCursor;
+	}
+	
+	public boolean onlyGraphicsViewShowing() {
+		return !showSpreadsheetView() && !showAlgebraView();
+	}
+
+	public AppletImplementation getApplet() {
+			return appletImpl;
+		
 	}
 
 }

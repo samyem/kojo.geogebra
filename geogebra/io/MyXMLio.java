@@ -782,13 +782,6 @@ public class MyXMLio {
 		sb.ensureCapacity(sb.length() + addStr.length());
 		sb.append(addStr);
 
-		// save cas session
-		if (app.hasCasView()) {
-			addStr = app.getCasView().getSessionXML();
-			sb.ensureCapacity(sb.length() + addStr.length());
-			sb.append(addStr);
-		}
-			
 		sb.ensureCapacity(sb.length() + 20);
 		sb.append("</geogebra>");
 

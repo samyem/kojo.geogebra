@@ -186,8 +186,13 @@ public class UndoManager {
 		// create temp file
 		File tempFile = File.createTempFile(TEMP_FILE_PREFIX, ".ggb");
 		// Remove when program ends
-		tempFile.deleteOnExit();
-
+		
+		try {
+			tempFile.deleteOnExit();
+		} catch (ExceptionInInitializerError e) {} // stop error message on --help
+		
+		
+		
 		// create file
 		FileOutputStream fos = new FileOutputStream(tempFile);
 		MyXMLio.writeZipped(fos, undoXML); 		

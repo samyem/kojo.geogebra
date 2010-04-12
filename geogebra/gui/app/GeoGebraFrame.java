@@ -112,8 +112,10 @@ public class GeoGebraFrame extends JFrame implements WindowFocusListener
 	}
 
 	public void setVisible(boolean flag) {				
-		if (flag) {						
-			updateSize();									
+		if (flag) {	
+			
+			// hack to make running on Sugar work (see later)
+			if (!app.runningOnSugar) updateSize();									
 			
 			// set location
 			int instanceID = instances.size() - 1;
@@ -134,6 +136,10 @@ public class GeoGebraFrame extends JFrame implements WindowFocusListener
 			}
 			
 			super.setVisible(true);	
+			
+			// hack to make running on Sugar work (see earlier)
+			if (app.runningOnSugar) updateSize();	
+			
 			app.getEuclidianView().requestFocusInWindow();
 		}
 		else {	

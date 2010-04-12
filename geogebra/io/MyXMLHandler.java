@@ -75,8 +75,8 @@ public class MyXMLHandler implements DocHandler {
 	private static final int MODE_MACRO = 50;
 	private static final int MODE_EUCLIDIAN_VIEW = 100;
 	private static final int MODE_SPREADSHEET_VIEW = 150;
-	private static final int MODE_CAS_VIEW = 160;
-	private static final int MODE_CAS_SESSION = 161;
+	//private static final int MODE_CAS_VIEW = 160;
+	//private static final int MODE_CAS_SESSION = 161;
 	private static final int MODE_CAS_CELL_PAIR = 162;
 	private static final int MODE_CAS_INPUT_CELL = 163;
 	private static final int MODE_CAS_OUTPUT_CELL = 164;
@@ -88,7 +88,7 @@ public class MyXMLHandler implements DocHandler {
 
 	private int mode;
 	private int constMode; // submode for <construction>
-	private int casSessionMode; // submode for <casSession>
+	//private int casSessionMode; // submode for <casSession>
 
 	// avoid import geogebra.cas.view.CASTableCellValue as this is in cas jar
 	// file
@@ -168,7 +168,6 @@ public class MyXMLHandler implements DocHandler {
 		mode = MODE_INVALID;
 		constMode = MODE_CONSTRUCTION;
 
-		casSessionMode = MODE_CAS_SESSION;
 	}
 
 	private void reset(boolean start) {
@@ -232,14 +231,6 @@ public class MyXMLHandler implements DocHandler {
 
 		case MODE_SPREADSHEET_VIEW:
 			startSpreadsheetViewElement(eName, attrs);
-			break;
-
-		case MODE_CAS_VIEW:
-			startCASViewElement(eName, attrs);
-			break;
-
-		case MODE_CAS_SESSION:
-			startCASSessionElement(eName, attrs);
 			break;
 
 		case MODE_KERNEL:
@@ -318,15 +309,6 @@ public class MyXMLHandler implements DocHandler {
 				mode = MODE_GEOGEBRA;
 			break;
 
-		case MODE_CAS_VIEW:
-			if (eName.equals("casView"))
-				mode = MODE_GEOGEBRA;
-			break;
-
-		case MODE_CAS_SESSION:
-			endCASSessionElement(eName);
-			break;
-
 		case MODE_KERNEL:
 			if (eName.equals("kernel"))
 				mode = MODE_GEOGEBRA;
@@ -358,48 +340,6 @@ public class MyXMLHandler implements DocHandler {
 		}
 	}
 
-	private void endCASSessionElement(String eName) {
-		switch (casSessionMode) {
-		case MODE_CAS_SESSION:
-			if (eName.equals("casSession")) {
-				// process start points at end of construction
-				processCellPairList();
-				mode = MODE_GEOGEBRA;
-			}
-			break;
-
-		case MODE_CAS_CELL_PAIR:
-			if (eName.equals("cellPair"))
-				casSessionMode = MODE_CAS_SESSION;
-			break;
-
-		case MODE_CAS_INPUT_CELL:
-			if (eName.equals("inputCell"))
-				casSessionMode = MODE_CAS_CELL_PAIR;
-			break;
-
-		case MODE_CAS_OUTPUT_CELL:
-			if (eName.equals("outputCell"))
-				casSessionMode = MODE_CAS_CELL_PAIR;
-			break;
-
-		default:
-			casSessionMode = MODE_CAS_SESSION; // set back mode
-			System.err.println("unknown cas session mode:" + constMode);
-		}
-
-	}
-
-	private void processCellPairList() {
-		try {
-			app.getCasView().initCellPairs(cellPairList);
-			cellPairList.clear();
-		} catch (Exception e) {
-			cellPairList.clear();
-			e.printStackTrace();
-			throw new MyError(app, "processCellPairList: " + e.toString());
-		}
-	}
 
 	// ====================================
 	// <geogebra>
@@ -411,10 +351,6 @@ public class MyXMLHandler implements DocHandler {
 			mode = MODE_KERNEL;
 		} else if (eName.equals("spreadsheetView")) {
 			mode = MODE_SPREADSHEET_VIEW;
-		} else if (eName.equals("casView")) {
-			mode = MODE_CAS_VIEW;
-		} else if (eName.equals("casSession")) {
-			mode = MODE_CAS_SESSION;
 		} else if (eName.equals("gui")) {
 			mode = MODE_GUI;
 		} else if (eName.equals("macro")) {
@@ -531,28 +467,6 @@ public class MyXMLHandler implements DocHandler {
 			System.err.println("error in <spreadsheetView>: " + eName);
 	}
 
-	// ====================================
-	// <CASView>
-	// ====================================
-	private void startCASViewElement(String eName, LinkedHashMap attrs) {
-		boolean ok = true;
-
-		switch (eName.charAt(0)) {
-		case 's':
-			if (eName.equals("size")) {
-				ok = handleCASSize(app.getCasView(), attrs);
-				break;
-			}
-
-		default:
-			System.err.println("unknown tag in <casView>: " + eName);
-		}
-
-		if (!ok)
-			System.err.println("error in <casView>: " + eName);
-
-	}
-
 	private boolean handleCoordSystem(EuclidianView ev, LinkedHashMap attrs) {
 		try {
 			double xZero = Double.parseDouble((String) attrs.get("xZero"));
@@ -641,8 +555,9 @@ public class MyXMLHandler implements DocHandler {
 	}
 
 	private boolean handleEvSize(EuclidianView ev, LinkedHashMap attrs) {
-		if (app.isApplet())
-			return true;
+		// removed, needed to resize applet correctly
+		//if (app.isApplet())
+		//	return true;
 
 		try {
 			int width = Integer.parseInt((String) attrs.get("width"));
@@ -685,24 +600,6 @@ public class MyXMLHandler implements DocHandler {
 		}
 	}
 
-	private boolean handleCASSize(CasManager casView, LinkedHashMap attrs) {
-		if (app.isApplet())
-			return true;
-
-		try {
-			int width = Integer.parseInt((String) attrs.get("width"));
-			int height = Integer.parseInt((String) attrs.get("height"));
-
-			// it seems that this statement does not work, because now cas use
-			// its own frame. --Quan Yuan
-			((JComponent) app.getCasView()).setPreferredSize(new Dimension(
-					width, height));
-			return true;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return false;
-		}
-	}
 
 	private boolean handleBgColor(EuclidianView ev, LinkedHashMap attrs) {
 		Color col = handleColorAttrs(attrs);
@@ -1197,109 +1094,7 @@ public class MyXMLHandler implements DocHandler {
 		cons.setWorksheetText(below, 1);
 	}
 
-	// ====================================
-	// <CAS Session>
-	// ====================================
-	private void startCASSessionElement(String eName, LinkedHashMap attrs) {
-		// handle cas session mode
-		switch (casSessionMode) {
-		case MODE_CAS_SESSION:
-			if (eName.equals("cellPair")) {
-				casSessionMode = MODE_CAS_CELL_PAIR;
-//				app.loadCASJar();
-//				casTableCellValueElement = new geogebra.cas.view.CASTableCellValue();
-				casTableCellValueElement = app.getCasView().createCellValue();
-			} else {
-				System.err.println("unknown tag in <cellPair>: " + eName);
-			}
-			break;
 
-		case MODE_CAS_CELL_PAIR:
-			if (eName.equals("inputCell")) {
-				casSessionMode = MODE_CAS_INPUT_CELL;
-			} else if (eName.equals("outputCell")) {
-				casSessionMode = MODE_CAS_OUTPUT_CELL;
-			} else {
-				System.err.println("unknown tag in <cellPair>: " + eName);
-			}
-			break;
-
-		case MODE_CAS_INPUT_CELL:
-			startCellInputElement(eName, attrs);
-			break;
-
-		case MODE_CAS_OUTPUT_CELL:
-			startCellOutputElement(eName, attrs);
-			break;
-
-		default:
-			System.err.println("unknown cas session mode:" + constMode);
-		}
-	}
-
-	private void startCellOutputElement(String eName, LinkedHashMap attrs) {
-		if (casTableCellValueElement == null) {
-			System.err.println("no element set for <" + eName + ">");
-			return;
-		}
-
-		boolean ok = true;
-		switch (eName.charAt(0)) {
-		case 'e':
-			if (eName.equals("expression")) {
-				ok = handleOutExpression(attrs);
-				break;
-			}
-
-		case 'c':
-			if (eName.equals("color")) {
-				ok = handleCASPairColor(attrs);
-				if (ok) {
-					cellPairList.removeLast();
-					cellPairList.add(casTableCellValueElement);
-
-				}
-				break;
-			}
-
-		default:
-			System.err.println("unknown tag in <outputCell>: " + eName);
-		}
-
-		if (!ok)
-			System.err.println("error in <outputCell>: " + eName);
-
-	}
-
-	private void startCellInputElement(String eName, LinkedHashMap attrs) {
-		if (casTableCellValueElement == null) {
-			System.err.println("no element set for <" + eName + ">");
-			return;
-		}
-
-		boolean ok = true;
-		switch (eName.charAt(0)) {
-		case 'e':
-			if (eName.equals("expression")) {
-				ok = handleInputExpression(attrs);
-				break;
-			}
-
-		case 'c':
-			if (eName.equals("color")) {
-				ok = handleCASPairColor(attrs);
-				if (ok)
-					cellPairList.add(casTableCellValueElement);
-				break;
-			}
-
-		default:
-			System.err.println("unknown tag in <inputCell>: " + eName);
-		}
-
-		if (!ok)
-			System.err.println("error in <inputCell>: " + eName);
-	}
 
 	private void startConstructionElement(String eName, LinkedHashMap attrs) {
 		// handle construction mode
@@ -1902,43 +1697,6 @@ public class MyXMLHandler implements DocHandler {
 		}
 	}
 
-	private boolean handleInputExpression(LinkedHashMap attrs) {
-		try {
-//			app.loadCASJar();
-//			((geogebra.cas.view.CASTableCellValue) casTableCellValueElement)
-//					.setCommand((String) attrs.get("value"));
-
-			casTableCellValueElement = app.getCasView().setInputExpression(casTableCellValueElement,
-					(String) attrs.get("value"));
-			return true;
-		} catch (Exception e) {
-			return false;
-		}
-	}
-
-	private boolean handleOutExpression(LinkedHashMap attrs) {
-		try {
-//			app.loadCASJar();
-//			((geogebra.cas.view.CASTableCellValue) casTableCellValueElement)
-//					.setOutput((String) attrs.get("value"));
-//			((geogebra.cas.view.CASTableCellValue) casTableCellValueElement)
-//					.setOutputAreaInclude(true);
-			casTableCellValueElement = app.getCasView().setOutputExpression(casTableCellValueElement,
-					(String) attrs.get("value"));
-			return true;
-		} catch (Exception e) {
-			return false;
-		}
-	}
-
-	private boolean handleCASPairColor(LinkedHashMap attrs) {
-		Color col = handleColorAttrs(attrs);
-		if (col == null)
-			return false;
-		// geo.setObjColor(col);
-
-		return true;
-	}
 
 	/*
 	 * this should not be needed private boolean

@@ -806,6 +806,9 @@ public class GgbAPI {
 	 */
 	public synchronized void setAxesVisible(boolean xVisible, boolean yVisible) {		
 		app.getEuclidianView().showAxes(xVisible, yVisible);
+		//app.getEuclidianView().updateBackground();
+		//app.refreshViews();
+		kernel.notifyRepaint();
 	}	
 	
 	/**

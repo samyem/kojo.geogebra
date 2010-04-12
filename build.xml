@@ -76,7 +76,7 @@ office@geogebra.org
 		<mkdir dir="${build.dir}/unsigned/unpacked"/>
 		<mkdir dir="${propertiestemp.dir}"/>
 		<delete>
-		    <fileset dir="${build.dir}" includes="**/geogebra*.jar, **/gluegen-rt.jar, **/jogl.jar, **/*.jar.pack.gz, **/*.html"/>
+		    <fileset dir="${build.dir}" includes="**/geogebra*.jar, **/gluegen-rt.jar, **/jogl.jar, **/jlatexmath.jar ,**/*.jar.pack.gz, **/*.html"/>
 		</delete>		
 	</target>
 	
