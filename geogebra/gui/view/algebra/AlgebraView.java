@@ -217,8 +217,11 @@ public class AlgebraView extends JTree implements View {
 				
 		// draw a cross in the upper right corner 
 		// to close the algebra view
-		if (!app.isApplet())
-			drawClosingCross((Graphics2D) g);
+		// Lalit Pant - don't draw closing cross on Kojo, because context menu gets out of sync
+		// the real solution to this problem (if it shows up for other UI elements might be to 
+		// tweak Application.updateMenubar. See there for more details
+//		if (!app.isApplet())
+//			drawClosingCross((Graphics2D) g);
 	}		
 	
 	private void drawClosingCross(Graphics2D g2) {

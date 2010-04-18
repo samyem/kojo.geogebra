@@ -108,6 +108,22 @@ public abstract class MenubarImpl extends JMenuBar implements Menubar {
 		return selectAllAction;
 	}
 	
+	public Action getSaveAction() {
+		return saveAction;
+	}
+	
+	public Action getSaveAsAction() {
+		return saveAsAction;
+	}
+	
+	public Action getLoadAction() {
+		return loadAction;
+	}
+	
+	public Action getNewAction() {
+		return deleteAll;
+	}
+	
 	public void updateMenubar() {	
 		EuclidianView ev = app.getEuclidianView();
 		cbShowAxes.setSelected(ev.getShowXaxis() && ev.getShowYaxis());
