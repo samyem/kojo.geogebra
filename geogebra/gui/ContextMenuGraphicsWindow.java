@@ -130,6 +130,18 @@ implements ActionListener {
         add(((GeoGebraMenuBar)app.getGuiManager().getMenuBar()).getViewMenu());
         add(((GeoGebraMenuBar)app.getGuiManager().getMenuBar()).getOptionsMenu());
         add(((GeoGebraMenuBar)app.getGuiManager().getMenuBar()).getEditMenu());
+        
+        addSeparator();     
+        
+        JMenuItem cbLoad = new JMenuItem(((GeoGebraMenuBar)app.getGuiManager().getMenuBar()).getLoadAction());
+        cbLoad.setText("Load From...");
+        add(cbLoad);
+        JMenuItem cbSaveAs = new JMenuItem(((GeoGebraMenuBar)app.getGuiManager().getMenuBar()).getSaveAsAction());
+        cbSaveAs.setText("Save To...");
+        add(cbSaveAs);
+        JMenuItem cbNew = new JMenuItem(((GeoGebraMenuBar)app.getGuiManager().getMenuBar()).getNewAction());
+        cbNew.setText("Clear");
+        add(cbNew);
 }
         
     public void actionPerformed(ActionEvent e) {                                            
