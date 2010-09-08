@@ -553,6 +553,10 @@ public abstract class Application implements KeyEventDispatcher {
 		isSaved = false;
 	}
 
+	public void setSaved() {
+		isSaved = true;
+	}
+
 	public boolean isIniting() {
 		return INITING;
 	}
@@ -953,7 +957,7 @@ public abstract class Application implements KeyEventDispatcher {
 		euclidianView.updateBackground();
 		kernel.notifyRepaint();
 	}
-
+	
 	public void setFrame(JFrame frame) {
 		isApplet = false;
 		mainComp = frame;
@@ -988,9 +992,10 @@ public abstract class Application implements KeyEventDispatcher {
 	}
 
 	public synchronized JFrame getFrame() {
-		if (frame == null) {
-			frame = getGuiManager().createFrame();
-		}
+//		creating a frame does not work within Kojo (causes a blank screen when opening files)
+//		if (frame == null) {
+//			frame = getGuiManager().createFrame();
+//		}
 
 		return frame;
 	}
@@ -2127,6 +2132,10 @@ public abstract class Application implements KeyEventDispatcher {
 	}
 
 	public void updateMenubar() {
+		// This might work out better for Kojo to keep UI and context menu in sync
+//		if (!hasGuiManager())
+//			return;
+		
 		if (!showMenuBar || !hasGuiManager())
 			return;
 
@@ -2604,8 +2613,8 @@ public abstract class Application implements KeyEventDispatcher {
 			// application codebase
 			String path = GeoGebra.class.getProtectionDomain().getCodeSource().getLocation().toExternalForm();
 			// remove "geogebra.jar" from end of codebase string
-			if (path.endsWith(JAR_FILES[0])) 
-				path = path.substring(0, path.length() -  JAR_FILES[0].length());
+			if (path.endsWith(JAR_FILES[0] + "!/")) 
+				path = path.substring(0, path.length() -  JAR_FILES[0].length() - 2);
 			
 			// set codebase
 			codebase = new URL(path);	

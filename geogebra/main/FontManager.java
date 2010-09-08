@@ -169,9 +169,9 @@ public class FontManager {
 		serifFont = getFont(serif, Font.PLAIN, size);
 		serifFontBold = getFont(serif, Font.BOLD, size);	
 		
-		setLAFFont(plainFont);
-		
-		System.out.println("Fonts used: sans: " + sans + ", serif: " + serif);
+//		setLAFFont(plainFont);
+//		
+//		System.out.println("Fonts used: sans: " + sans + ", serif: " + serif);
 	}
 	
 	

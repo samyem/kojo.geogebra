@@ -926,23 +926,23 @@ public class DefaultGuiManager implements GuiManager {
 	}
 
 	public synchronized void initFileChooser() {
-		if (fileChooser == null) {
-			try {
-				fileChooser = new GeoGebraFileChooser(app.getCurrentImagePath()); // non-restricted
-				// Added for Intergeo File Format (Yves Kreis) -->
-				fileChooser.addPropertyChangeListener(
-						JFileChooser.FILE_FILTER_CHANGED_PROPERTY,
-						new FileFilterChangedListener());
-				// <-- Added for Intergeo File Format (Yves Kreis)
-			} catch (Exception e) { 
-				// fix for  java.io.IOException: Could not get shell folder ID list
-				// Java bug http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6544857
-				Application.debug("Error creating GeoGebraFileChooser - using fallback option");
-				fileChooser = new GeoGebraFileChooser(app.getCurrentImagePath(), true); // restricted version		
-			} 
-					
-			updateJavaUILanguage();
-		}
+		// Lalit Pant - Init file chooser every time for Kojo, to avoid the selected file 
+		// showing up in the dialog
+		try {
+			fileChooser = new GeoGebraFileChooser(app.getCurrentImagePath()); // non-restricted
+			// Added for Intergeo File Format (Yves Kreis) -->
+			fileChooser.addPropertyChangeListener(
+					JFileChooser.FILE_FILTER_CHANGED_PROPERTY,
+					new FileFilterChangedListener());
+			// <-- Added for Intergeo File Format (Yves Kreis)
+		} catch (Exception e) { 
+			// fix for  java.io.IOException: Could not get shell folder ID list
+			// Java bug http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6544857
+			Application.debug("Error creating GeoGebraFileChooser - using fallback option");
+			fileChooser = new GeoGebraFileChooser(app.getCurrentImagePath(), true); // restricted version		
+		} 
+				
+		updateJavaUILanguage();
 	}
 	
 	/**
@@ -1057,45 +1057,53 @@ public class DefaultGuiManager implements GuiManager {
 	}
 
 	  // returns true for YES or NO and false for CANCEL
-    public boolean saveCurrentFile() {    	
-    	if (propDialog != null && propDialog.isShowing()) 
-    		propDialog.cancel();
-    	app.getEuclidianView().reset();
+    public boolean saveCurrentFile() {
+    	// Lalit Pant - Take 2 - Kojo is not file/document oriented, so we don't prompt the user to save work
+    	return true;
     	
-    	// use null component for iconified frame
-    	Component comp = app.getMainComponent();
-    	if (app.getFrame() instanceof GeoGebraFrame) {
-    		GeoGebraFrame frame = (GeoGebraFrame) app.getFrame();
-    		comp = frame != null && !frame.isIconified() ? frame : null;
-    	}
-    	
-    	// Michael Borcherds 2008-05-04
-    	Object[] options = { app.getMenu("Save"), app.getMenu("DontSave"), app.getMenu("Cancel") };
-    	int	returnVal=    
-    			JOptionPane.showOptionDialog(comp, app.getMenu("DoYouWantToSaveYourChanges"), app.getMenu("CloseFile"),
-             JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
-
-             null, options, options[0]);     
-
-/*    	
-        int returnVal =
-            JOptionPane.showConfirmDialog(
-            		comp,
-                getMenu("SaveCurrentFileQuestion"),
-                app.getPlain("ApplicationName") + " - " + app.getPlain("Question"),
-                JOptionPane.YES_NO_CANCEL_OPTION,
-                JOptionPane.QUESTION_MESSAGE);*/
-
-        switch (returnVal) {
-            case 0 :
-                return save();
-
-            case 1 :
-                return true;
-
-            default : 
-                return false;
-        }
+//    	if (propDialog != null && propDialog.isShowing()) 
+//    		propDialog.cancel();
+//    	app.getEuclidianView().reset();
+//    	
+//    	// use null component for iconified frame
+//    	// Lalit Pant - Take 1 - This causes a problem within Kojo while opening a file - the MathWorld 
+//    	// Panel becomes empty and grey - because the frame becomes non-null after the 
+//    	// app.getFrame call, and this new frame is populated with the contents of the new file
+//    	// four lines below the next one commented out.
+//    	Component comp = app.getMainComponent();
+////    	if (app.getFrame() instanceof GeoGebraFrame) {
+////    		GeoGebraFrame frame = (GeoGebraFrame) app.getFrame();
+////    		comp = frame != null && !frame.isIconified() ? frame : null;
+////    	}
+//    	
+//    	// Michael Borcherds 2008-05-04
+//    	Object[] options = { app.getMenu("Save"), app.getMenu("DontSave"), app.getMenu("Cancel") };
+//    	int	returnVal=    
+//    			JOptionPane.showOptionDialog(comp, app.getMenu("DoYouWantToSaveYourChanges"), "Math World is being Cleared...",
+//             JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
+//
+//             null, options, options[0]);     
+//
+///*    	
+//        int returnVal =
+//            JOptionPane.showConfirmDialog(
+//            		comp,
+//                getMenu("SaveCurrentFileQuestion"),
+//                app.getPlain("ApplicationName") + " - " + app.getPlain("Question"),
+//                JOptionPane.YES_NO_CANCEL_OPTION,
+//                JOptionPane.QUESTION_MESSAGE);*/
+//
+//        switch (returnVal) {
+//            case 0 :
+//            // Lalit Pant - within Kojo, we always 'Save To...'
+//                return saveAs();
+//
+//            case 1 :
+//                return true;
+//
+//            default : 
+//                return false;
+//        }
     }
     
 
@@ -1201,6 +1209,8 @@ public class DefaultGuiManager implements GuiManager {
 		 * removeExtension(fileChooser.getSelectedFile()); }
 		 */
 		// <-- Modified for Intergeo File Format (Yves Kreis)
+		// Lalit Pant - don't show selected file within Kojo
+		selectedFile = null;
 		if (selectedFile != null) {
 			// Added for Intergeo File Format (Yves Kreis) -->
 			fileExtension = Application.getExtension(selectedFile);
@@ -1242,6 +1252,8 @@ public class DefaultGuiManager implements GuiManager {
 
 		while (!done) {
 			// show save dialog
+			// Lalit Pant - don't show selected file within Kojo
+			fileChooser.setSelectedFile(null);
 			int returnVal = fileChooser.showSaveDialog(app.getMainComponent());
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				file = fileChooser.getSelectedFile();
@@ -1391,11 +1403,16 @@ public class DefaultGuiManager implements GuiManager {
 			// Schandeler)
 
 			app.setDefaultCursor();
+			// Lalit Pant - allow only one file to be opened within Kojo
+			fileChooser.setMultiSelectionEnabled(false);
+			// Lalit Pant - don't show selected file within Kojo
+			fileChooser.setSelectedFile(null);
 			int returnVal = fileChooser.showOpenDialog(app.getMainComponent());
 
 			File[] files = null;
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
-				files = fileChooser.getSelectedFiles();
+				File file = fileChooser.getSelectedFile();
+				files = new File[]{file};
 			}
 			
 			// Modified for Intergeo File Format (Yves Kreis) -->
