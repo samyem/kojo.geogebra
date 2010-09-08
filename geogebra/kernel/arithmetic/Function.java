@@ -224,7 +224,7 @@ implements ExpressionValue, RealRootFunction, Functional {
      * numerical value, i.e. it is of the form f(x) = c.
      */
     final public boolean isConstantFunction() {
-    	return isConstantFunction;
+    	return isConstantFunction || !expression.contains(fVar);
     }      
     
     public boolean isConstant() {

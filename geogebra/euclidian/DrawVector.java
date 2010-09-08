@@ -18,6 +18,7 @@ the Free Software Foundation.
 
 package geogebra.euclidian;
 
+import geogebra.euclidian.clipping.ClipLine;
 import geogebra.kernel.ConstructionDefaults;
 import geogebra.kernel.GeoElement;
 import geogebra.kernel.GeoPoint;
@@ -156,7 +157,7 @@ public class DrawVector extends Drawable implements Previewable {
 			// clip at screen, that's important for huge coordinates
 			// check if any of vector is on-screen
 			Point2D.Double [] clippedPoints = 
-				Clipping.getClipped(coordsA[0], coordsA[1], coordsB[0], coordsB[1], -EuclidianView.CLIP_DISTANCE, view.width + EuclidianView.CLIP_DISTANCE, -EuclidianView.CLIP_DISTANCE, view.height + EuclidianView.CLIP_DISTANCE);
+				ClipLine.getClipped(coordsA[0], coordsA[1], coordsB[0], coordsB[1], -EuclidianView.CLIP_DISTANCE, view.width + EuclidianView.CLIP_DISTANCE, -EuclidianView.CLIP_DISTANCE, view.height + EuclidianView.CLIP_DISTANCE);
 			if (clippedPoints == null) {
 				isVisible = false;	
 				lineVisible = false;
@@ -165,7 +166,7 @@ public class DrawVector extends Drawable implements Previewable {
 				
 				// now re-clip at A and F
 				clippedPoints = 
-					Clipping.getClipped(coordsA[0], coordsA[1], coordsF[0], coordsF[1], -EuclidianView.CLIP_DISTANCE, view.width + EuclidianView.CLIP_DISTANCE, -EuclidianView.CLIP_DISTANCE, view.height + EuclidianView.CLIP_DISTANCE);
+					ClipLine.getClipped(coordsA[0], coordsA[1], coordsF[0], coordsF[1], -EuclidianView.CLIP_DISTANCE, view.width + EuclidianView.CLIP_DISTANCE, -EuclidianView.CLIP_DISTANCE, view.height + EuclidianView.CLIP_DISTANCE);
 				if (clippedPoints != null)
 					line.setLine(clippedPoints[0].x, clippedPoints[0].y, clippedPoints[1].x, clippedPoints[1].y);
 				else 

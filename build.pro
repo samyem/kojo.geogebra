@@ -3,13 +3,13 @@
 #
 # Oct 23rd 2008
 #
--injars ../build/geogebra.jar
--injars ../build/geogebra_main.jar
--injars ../build/geogebra_gui.jar
--injars ../build/geogebra_export.jar
--injars ../build/geogebra_cas.jar
+-injars ../buildggb32/geogebra.jar
+-injars ../buildggb32/geogebra_main.jar
+-injars ../buildggb32/geogebra_gui.jar
+-injars ../buildggb32/geogebra_export.jar
+-injars ../buildggb32/geogebra_cas.jar
 
--outjars ../build/temp
+-outjars ../buildggb32/temp
 
 -libraryjars ../java142-rt.jar
 -libraryjars netscape_javascript.jar

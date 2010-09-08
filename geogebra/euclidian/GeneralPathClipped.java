@@ -1,5 +1,7 @@
 package geogebra.euclidian;
 
+import geogebra.euclidian.clipping.ClipLine;
+
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
@@ -117,7 +119,7 @@ public class GeneralPathClipped implements Shape {
 		
 		// at least one point is not on screen: clip line at screen
 		Point2D.Double [] clippedPoints = 
-			Clipping.getClipped(prevP.x, prevP.y, curP.x, curP.y, -5, view.width+5, -5, view.height+5);
+			ClipLine.getClipped(prevP.x, prevP.y, curP.x, curP.y, -5, view.width+5, -5, view.height+5);
 
 		if (clippedPoints != null) {
 			// we have two intersection points with the screen

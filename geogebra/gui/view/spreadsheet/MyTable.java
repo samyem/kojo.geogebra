@@ -430,7 +430,7 @@ public class MyTable extends JTable
 		
 		if (ob instanceof GeoElement) {
 			GeoElement geo = (GeoElement) ob;
-			if (!geo.isGeoText() && 
+			if (!geo.isGeoText() && !geo.isFixed() &&
 					editor.getEditorInitString(geo).length() > MAX_CELL_EDIT_STRING_LENGTH) {
 				app.getGuiManager().showRedefineDialog(geo, false);
 				return true;
@@ -1282,6 +1282,15 @@ public class MyTable extends JTable
 		public void letterOrDigitTyped() {
 			allowEditing = true;
 			repaint();  //G.Sturr 2009-10-10: cleanup when keypress edit begins
+			
+			// check if cell fixed
+			Object o = tableModel.getValueAt(getSelectedRow(), getSelectedColumn());			
+			if ( o != null && o instanceof GeoElement) {
+				GeoElement geo = (GeoElement)o;
+				if (geo.isFixed()) return;
+			}
+		
+			
 			tableModel.setValueAt(null, getSelectedRow(), getSelectedColumn());
 			editCellAt(getSelectedRow(), getSelectedColumn()); 
 			// workaround, see

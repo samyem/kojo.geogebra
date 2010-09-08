@@ -4169,7 +4169,6 @@ public class Kernel {
 		AlgoDilate algo = new AlgoDilate(cons, label, geoRot, r, S);
 		GeoElement ret = algo.getResult();
 		ret.setVisualStyleForTransformations((GeoElement) geoRot);
-		ret.update();
 		GeoElement[] geos = { ret };
 		return geos;
 	}
@@ -4190,7 +4189,6 @@ public class Kernel {
 		AlgoMirror algo = new AlgoMirror(cons, label, geoMir, Q);
 		GeoElement ret = algo.getResult();
 		ret.setVisualStyleForTransformations((GeoElement) geoMir);
-		ret.update();
 		GeoElement[] geos = { ret };
 		return geos;
 	}
@@ -4205,7 +4203,6 @@ public class Kernel {
 		AlgoMirror algo = new AlgoMirror(cons, label, Q, conic);
 		GeoElement ret = algo.getResult();
 		ret.setVisualStyleForTransformations((GeoElement) Q);
-		ret.update();
 		GeoElement[] geos = { ret };
 		return geos;
 	}
@@ -4233,7 +4230,6 @@ public class Kernel {
 		AlgoMirror algo = new AlgoMirror(cons, label, geoMir, g);
 		GeoElement ret = algo.getResult();
 		ret.setVisualStyleForTransformations((GeoElement) geoMir);
-		ret.update();
 		GeoElement[] geos = { ret };
 		return geos;
 	}
@@ -4257,7 +4253,6 @@ public class Kernel {
 			newPoints[i] = (GeoPoint) Translate(transformedGeoLabel(points[i]),
 					points[i], v)[0];
 			newPoints[i].setVisualStyleForTransformations(points[i]);
-			newPoints[i].update();
 		}
 		return newPoints;
 	}
@@ -4298,7 +4293,6 @@ public class Kernel {
 			else
 				rotPoints[i] = (GeoPoint) Rotate(pointLabel, points[i], phi, Q)[0];
 			rotPoints[i].setVisualStyleForTransformations(points[i]);
-			rotPoints[i].update();
 		}
 		return rotPoints;
 	}
@@ -4318,7 +4312,6 @@ public class Kernel {
 			String pointLabel = transformedGeoLabel(points[i]);
 			newPoints[i] = (GeoPoint) Dilate(pointLabel, points[i], r, S)[0];
 			newPoints[i].setVisualStyleForTransformations(points[i]);
-			newPoints[i].update();
 		}
 		return newPoints;
 	}
@@ -4349,7 +4342,6 @@ public class Kernel {
 			else
 				newPoints[i] = (GeoPoint) Mirror(pointLabel, points[i], Q)[0];
 			newPoints[i].setVisualStyleForTransformations(points[i]);
-			newPoints[i].update();
 		}
 		return newPoints;
 	}
@@ -4374,7 +4366,6 @@ public class Kernel {
 			transformedPoints[i].setEuclidianVisible(oldPoints[i]
 					.isSetEuclidianVisible());
 			transformedPoints[i].setVisualStyleForTransformations(oldPoints[i]);
-			transformedPoints[i].update();
 			notifyUpdate(transformedPoints[i]);
 		}
 
@@ -4440,7 +4431,6 @@ public class Kernel {
 		for (int i = 0; i < points.length; i++) {
 			result[i].setEuclidianVisible(points[i].isSetEuclidianVisible());
 			result[i].setVisualStyleForTransformations(points[i]);
-			result[i].update();
 			notifyUpdate(result[i]);
 		}
 		return result;
@@ -4483,7 +4473,6 @@ public class Kernel {
 			return null;
 		}
 		ret.setVisualStyleForTransformations(line);
-		ret.update();
 		return ret;
 	}
 
@@ -4525,7 +4514,6 @@ public class Kernel {
 		}
 
 		ret.setVisualStyleForTransformations(conic);
-		ret.update();
 		return ret;
 	}
 
@@ -4951,17 +4939,17 @@ public class Kernel {
 	}
 
 	/**
-	 * Returns whether x is greater than y
+	 * Returns whether x is greater than y	 	 
 	 */
 	final public boolean isGreater(double x, double y) {
-		return x > y;
+		return x > y + EPSILON;
 	}
-
+	
 	/**
-	 * Returns whether x is greater than or equal to y
+	 * Returns whether x is greater than or equal to y	 	 
 	 */
 	final public boolean isGreaterEqual(double x, double y) {
-		return x > y || isEqual(x, y);
+		return x + EPSILON > y;
 	}
 
 	// compares double arrays:

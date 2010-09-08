@@ -67,13 +67,14 @@ public class WorksheetExportDialog extends JDialog {
 	private static final int BUTTON_WIDTH = 200;
 	private static final int BUTTON_HEIGHT = 40;
 	private static final int DEFAULT_HTML_PAGE_WIDTH = 600;
-	private static final int DEFAULT_APPLET_WIDTH = 600;
-	private static final int DEFAULT_APPLET_HEIGHT = 500;	
+	public static final int DEFAULT_APPLET_WIDTH = 600;
+	public static final int DEFAULT_APPLET_HEIGHT = 500;	
 	
 	final private static int TYPE_HTMLFILE = 0;
 	final private static int TYPE_HTMLCLIPBOARD = 1;
 	final private static int TYPE_MEDIAWIKI = 2;
 	final private static int TYPE_GOOGLEGADGET = 3;
+	final private static int TYPE_MOODLE = 4;
 
 	private Application app;
 	private Kernel kernel;
@@ -169,6 +170,7 @@ public class WorksheetExportDialog extends JDialog {
 							//index 1 = clipboard + html
 							// index 2 = clipboard + mediawiki
 							// index 3 = clipboard + google gadget
+							// index 4 = clipboard + moodle
 							try {
 								exportToClipboard(cbFileType.getSelectedIndex());
 								
@@ -479,7 +481,7 @@ public class WorksheetExportDialog extends JDialog {
 		appletPanel.add(cbOfflineArchiveAndGgbFile);
 		
 		// file type (file/clipboard, mediaWiki)
-		String fileTypeStrings[] = {app.getMenu("File")+": html",app.getMenu("Clipboard")+": html",app.getMenu("Clipboard")+": MediaWiki",app.getMenu("Clipboard")+": Google Gadget" };
+		String fileTypeStrings[] = {app.getMenu("File")+": html",app.getMenu("Clipboard")+": html",app.getMenu("Clipboard")+": MediaWiki",app.getMenu("Clipboard")+": Google Gadget",app.getMenu("Clipboard")+": Moodle" };
 		cbFileType = new JComboBox(fileTypeStrings);
 		cbFileType.setEnabled(true);
 		JPanel secondLine2 = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 5));				
@@ -584,6 +586,19 @@ public class WorksheetExportDialog extends JDialog {
 		switch (type) {
 		case TYPE_HTMLCLIPBOARD:
 			stringSelection = new StringSelection(getHTML(null));
+			break;
+			
+		case TYPE_MOODLE:
+			int appletWidth, appletHeight;
+			if (!useWorksheet) { // change width and height for open button
+				appletWidth = BUTTON_WIDTH;
+				appletHeight = BUTTON_HEIGHT;
+			} else {
+				appletWidth = sizePanel.getSelectedWidth();
+				appletHeight = sizePanel.getSelectedHeight();
+			}
+
+			stringSelection = new StringSelection(getAppletTag(null, appletWidth, appletHeight, false));
 			break;
 			
 		case TYPE_MEDIAWIKI:
@@ -817,7 +832,7 @@ public class WorksheetExportDialog extends JDialog {
 		sb.append("<![CDATA[\n");
 		sb.append("<div id='ggbapplet'>\n");
 		
-		sb.append(getAppletTag(null, sizePanel.getSelectedWidth(), sizePanel.getSelectedHeight()));
+		sb.append(getAppletTag(null, sizePanel.getSelectedWidth(), sizePanel.getSelectedHeight(), true));
 
 		sb.append("</div>\n");
 		sb.append("]]>\n");
@@ -904,7 +919,7 @@ public class WorksheetExportDialog extends JDialog {
 
 		// includ applet tag
 		sb.append("\n\n");
-		sb.append(getAppletTag(ggbFile, appletWidth, appletHeight));
+		sb.append(getAppletTag(ggbFile, appletWidth, appletHeight, true));
 		sb.append("\n\n");
 
 		// text after applet
@@ -948,7 +963,8 @@ public class WorksheetExportDialog extends JDialog {
 		return sb.toString();
 	}
 	
-	private String getAppletTag(File ggbFile, int width, int height) {
+	
+	public String getAppletTag(File ggbFile, int width, int height, boolean mayscript) {
 		StringBuffer sb = new StringBuffer();
 		// include applet
 		sb.append("<applet name=\"ggbApplet\" code=\"geogebra.GeoGebraApplet\"");
@@ -973,8 +989,11 @@ public class WorksheetExportDialog extends JDialog {
 		sb.append(width);
 		sb.append("\" height=\"");
 		sb.append(height);
-		// add MAYSCRIPT to ensure ggbOnInit() can be called
-		sb.append("\" MAYSCRIPT>\n");
+		
+		sb.append("\"");
+		if (mayscript);
+		sb.append("mayscript=\"true\"");// add MAYSCRIPT to ensure ggbOnInit() can be called
+		sb.append(">\n");
 
 		if (cbOfflineArchiveAndGgbFile.isSelected() && ggbFile != null) {
 			// ggb file
@@ -1096,7 +1115,7 @@ public class WorksheetExportDialog extends JDialog {
 		
 		// JVM arguments, for Java 1.6.0_10 and later
 		// increase heap memory for applets
-		String javaArgs = "-Xmx" + GeoGebra.MAX_HEAP_SPACE + "m";
+		String javaArgs = "-Xmx" + GeoGebra.MAX_HEAP_SPACE + "m -Djnlp.packEnabled=true";
 		// TODO: include pack.gz files in offline export
 //		if (cbOfflineArchive.isSelected()) {
 //			// look for local pack200 files: jar.pack.gz

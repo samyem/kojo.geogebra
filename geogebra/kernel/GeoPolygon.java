@@ -5,7 +5,7 @@ http://www.geogebra.org
 This file is part of GeoGebra.
 
 This program is free software; you can redistribute it and/or modify it 
-under the terms of the GNU General Public License v2 as published by 
+under the terms of the GNU General Public License as published by 
 the Free Software Foundation.
 
 */
@@ -222,6 +222,9 @@ final public class GeoPolygon extends GeoElement implements NumberValue, Path {
 			}
 		}			
 		
+		// make sure segments created visible if appropriate
+		setDefined();
+		
 		// create missing segments
         for (int i=0; i < segments.length; i++) {
         	GeoPoint startPoint = points[i];
@@ -235,6 +238,7 @@ final public class GeoPolygon extends GeoElement implements NumberValue, Path {
                 // refresh color to ensure segments have same color as polygon:
                 segments[i].setObjColor(getObjectColor()); 
                 segments[i].setLineThickness(getLineThickness()); 
+                segments[i].setEuclidianVisible(i == 0 ? isEuclidianVisible() : segments[0].isEuclidianVisible());
                 //segments[i].setAuxiliaryObject(true);
         	}     
         }         

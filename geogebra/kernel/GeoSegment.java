@@ -375,6 +375,7 @@ final public class GeoSegment extends GeoLine implements LimitedPath, NumberValu
 			//	create LINE
 			GeoLine transformedLine = kernel.getTransformedLine(type, this, Q, l, vec, n);
 			transformedLine.setLabel(label);
+			transformedLine.setVisualStyleForTransformations(this);
 			GeoElement [] geos = {transformedLine};
 			return geos;
 		}							

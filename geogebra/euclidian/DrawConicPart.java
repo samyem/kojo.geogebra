@@ -12,6 +12,7 @@ the Free Software Foundation.
 
 package geogebra.euclidian;
 
+import geogebra.euclidian.clipping.ClipShape;
 import geogebra.kernel.AlgoConicPartCircle;
 import geogebra.kernel.AlgoConicPartCircumcircle;
 import geogebra.kernel.AlgoSemicircle;
@@ -60,8 +61,7 @@ implements Previewable {
     //private Drawable degDrawable;
     
     private double [] coords = new double[2];
-    private GeoPoint tempPoint;
-    
+
     // preview
     private ArrayList prevPoints;
     private GeoPoint [] previewTempPoints;  
@@ -149,19 +149,35 @@ implements Previewable {
 	private void updateEllipse() {	
 		draw_type = DRAW_TYPE_ELLIPSE;
 		
-		 // set arc
+		// check for huge pixel radius
+		double xradius = halfAxes[0] * view.xscale;
+		double yradius = halfAxes[1] * view.yscale;
+		if (xradius > DrawConic.HUGE_RADIUS || yradius > DrawConic.HUGE_RADIUS) {
+			isVisible = false;
+			return;
+		}
+		
+		// set arc
 		arc.setArc(-halfAxes[0],-halfAxes[1],
 					2*halfAxes[0],2*halfAxes[1],
 					-Math.toDegrees(conicPart.getParameterStart()),
 					-Math.toDegrees(conicPart.getParameterExtent()),
 					closure
 					);
-					
+			
 		// transform to screen coords
 		transform.setTransform(view.coordTransform);
 		transform.concatenate(conicPart.getAffineTransform()); 
-        shape = transform.createTransformedShape(arc);        
-                
+		
+        // check for radius larger than screen
+        int BIG_RADIUS = view.width + view.height;
+		if (xradius < BIG_RADIUS && yradius < BIG_RADIUS) {
+			shape = transform.createTransformedShape(arc); 
+		} else {
+			// clip big arc at screen
+	        shape = ClipShape.clipToRect(arc, transform, new Rectangle(-1,-1,view.width+2, view.height+2));
+		}
+		          
         // label position
         if (labelVisible) {    
         	double midAngle = conicPart.getParameterStart() + conicPart.getParameterExtent()/2.0;
@@ -203,7 +219,9 @@ implements Previewable {
 	}
     
 	final public void draw(Graphics2D g2) {
-        if (isVisible) {	
+        if (isVisible) {
+        	g2.clipRect(0,0,view.width, view.height);
+        	
         	switch (draw_type) {
         		case DRAW_TYPE_ELLIPSE:
 					if (geo.alphaValue > 0.0f) {
@@ -357,6 +375,8 @@ implements Previewable {
 	}
     
 	final public boolean hit(int x,int y) { 
+		if (!isVisible) return false;
+		
 		switch (draw_type) {
 			case DRAW_TYPE_ELLIPSE:
 				if (strokedShape == null) {

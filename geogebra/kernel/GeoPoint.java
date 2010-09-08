@@ -536,18 +536,24 @@ Translateable, PointRotateable, Mirrorable, Dilateable, PointProperties {
 		
 		// calculate the determinante of ABC
 		// det(ABC) = sum1 - sum2		
+		
 		double sum1 = A.x * B.y * C.z + 
-					  B.x * C.y * A.z +
-					  C.x * A.y * B.z;
+		B.x * C.y * A.z +
+		C.x * A.y * B.z;
 		double sum2 = A.z * B.y * C.x +
-					  B.z * C.y * A.x +
-					  C.z * A.y * B.x;
+		B.z * C.y * A.x +
+		C.z * A.y * B.x;
 				
-		// det(ABC) == 0  <=>  sum1 == sum2		
-		return Kernel.isEqual(sum1, sum2, Kernel.MIN_PRECISION);
+		// det(ABC) == 0  <=>  sum1 == sum2	
+		
+		// A.z, B.z, C.z could be zero
+		double eps = Math.max(Kernel.MIN_PRECISION, Kernel.MIN_PRECISION * A.z
+				* B.z * C.z);
+		
+		return Kernel.isEqual(sum1, sum2, eps );
 	}
-    
-    /**
+
+	/**
      * Calcs determinant of P and Q. Note: no test for defined or infinite is done here.
      */
 	public static final double det(GeoPoint P, GeoPoint Q) {		 

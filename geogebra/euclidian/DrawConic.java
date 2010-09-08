@@ -18,6 +18,7 @@ the Free Software Foundation.
 
 package geogebra.euclidian;
 
+import geogebra.euclidian.clipping.ClipShape;
 import geogebra.kernel.AlgoCirclePointRadius;
 import geogebra.kernel.AlgoCircleThreePoints;
 import geogebra.kernel.AlgoCircleTwoPoints;
@@ -53,9 +54,10 @@ final public class DrawConic extends Drawable implements Previewable {
     // plotpoints per quadrant for hyperbola
     private static final int PLOT_POINTS = 32;
 	static final int MAX_PLOT_POINTS = 300;
+	
     // maximum of pixels for a standard circle radius
-    // bigger circles are drawn via Arc2D
-    private static final double BIG_CIRCLE_RADIUS = 600;    
+    // bigger circles are drawn via Arc2D  
+    public static final double HUGE_RADIUS = 1E12;
            
     private GeoConic conic;
     
@@ -172,11 +174,11 @@ final public class DrawConic extends Drawable implements Previewable {
 	final public void update() {
         isVisible = geo.isEuclidianVisible();
         if (!isVisible) return;
-        labelVisible = geo.isLabelVisible();
-       
-        updateStrokes(conic);          
-        type = conic.getType();               
+        labelVisible = geo.isLabelVisible();         
         
+        updateStrokes(conic);
+        type = conic.getType();
+         
         switch (type) {
             case GeoConic.CONIC_SINGLE_POINT:                
                 updateSinglePoint();
@@ -196,40 +198,56 @@ final public class DrawConic extends Drawable implements Previewable {
                 updateEllipse();
                 break;
                 
+            case GeoConic.CONIC_PARABOLA:
+                updateParabola();
+                break;  
+                
             case GeoConic.CONIC_HYPERBOLA:    
                 updateHyperbola();
                 break;
-                
-            case GeoConic.CONIC_PARABOLA:
-                updateParabola();
-                break;                          
         }
         
+        if (!isVisible)
+        	return;
         
-        // on screen?
+        // shape on screen?
+        Rectangle viewRect = new Rectangle(0,0,view.width,view.height);
+        boolean includesScreenCompletely = false;
+        
         switch (type) {	                          	            
 	        case GeoConic.CONIC_CIRCLE:                                               
-	        case GeoConic.CONIC_ELLIPSE:   
-	        case GeoConic.CONIC_PARABOLA:	           
-	        	// shape on screen?
-	        	// Michael Borcherds: bugfix getBounds2D() added otherwise rotated parabolas not displayed sometimes
-	        	if (arcFiller == null && !shape.getBounds2D().intersects(0,0, view.width, view.height)) {				
-	    			isVisible = false;
-	    			return;
-	    		}
+	        case GeoConic.CONIC_ELLIPSE:
+	        	includesScreenCompletely = shape.contains(viewRect);
+	        	
+	        case GeoConic.CONIC_PARABOLA:
+	        	// offScreen = includesScreenCompletely or the shape does not intersect the view rectangle
+	        	boolean offScreen =  includesScreenCompletely || !shape.getBounds2D().intersects(viewRect);
+	        	if (geo.alphaValue == 0f) {
+	        		// no filling
+	        		isVisible = !offScreen;
+	        	} else {
+	        		// filling
+	        		if (includesScreenCompletely) {
+	        			isVisible = true;
+	        		} else {
+	        			isVisible = !offScreen;
+	        		}
+	        	}	        	
 	        	break;
 	            
 	        case GeoConic.CONIC_HYPERBOLA:
 	        	// hyperbola wings on screen?
-	        	hypLeftOnScreen = hypLeft.intersects(0,0, view.width, view.height);
-	        	hypRightOnScreen = hypRight.intersects(0,0, view.width, view.height);
+	        	hypLeftOnScreen = hypLeft.intersects(viewRect);
+	        	hypRightOnScreen = hypRight.intersects(viewRect);
 	        	if (!hypLeftOnScreen && !hypRightOnScreen) {
 	        		isVisible = false;
-	    			return;
 	        	}	            
 	            break;            
         }
         
+        if (!isVisible)
+        	return;
+
 		// draw trace
 		if (conic.trace) {
 			isTracing = true;
@@ -287,26 +305,35 @@ final public class DrawConic extends Drawable implements Previewable {
     }
     
     final private void updateCircle() {
+        // calc screen pixel of radius                        
+        radius =  halfAxes[0] * view.xscale;
+        yradius =  halfAxes[1] * view.yscale; // radius scaled in y direction
+		if (radius > DrawConic.HUGE_RADIUS || yradius > DrawConic.HUGE_RADIUS) {
+			isVisible = false;
+			return;
+		}
+		
         if (firstCircle) {
             firstCircle = false;  
             arc = new Arc2D.Double();     
             if (ellipse == null) ellipse = new Ellipse2D.Double();
         }
         
-        // calc screen pixel of radius                        
-        radius =  halfAxes[0] * view.xscale;
-        yradius =  halfAxes[1] * view.yscale; // radius scaled in y direction
                 
         i = -1; // bugfix
         
+        // calc screen coords of midpoint
+        mx =  midpoint.x * view.xscale + view.xZero;
+        my = -midpoint.y * view.yscale + view.yZero; 
+        
+        // BIG RADIUS: larger than screen diagonal
+        int BIG_RADIUS = view.width + view.height; // > view's diagonal 
+        
         // if circle is very big, draw arc: this is very important
         // for graphical continuity
-        if (radius < BIG_CIRCLE_RADIUS || yradius < BIG_CIRCLE_RADIUS) {              
+        if (radius < BIG_RADIUS && yradius < BIG_RADIUS) {              
             circle = ellipse;
             arcFiller = null;         
-            // calc screen coords of midpoint
-            mx =  midpoint.x * view.xscale + view.xZero;
-            my = -midpoint.y * view.yscale + view.yZero;   
             ellipse.setFrame(mx-radius, my-yradius, 2.0*radius, 2.0*yradius);                                                      
         } else {            
         // special case: really big circle
@@ -370,10 +397,14 @@ final public class DrawConic extends Drawable implements Previewable {
                 angEnd = Math.PI - Math.acos(mx / radius);
 				i = 3;
             }      
-            // on screen (should not be needed)
+            // center on screen 
             else {                
-                angSt = 0.0d;
-                angEnd = 2*Math.PI;                
+            	// huge circle with center on screen: use screen rectangle instead of circle for possible filling
+            	shape = circle = new Rectangle(-1,-1,view.width+2, view.height+2);
+                arcFiller = null; 
+                xLabel = -100;                
+                yLabel = -100;  
+                return;
             }            
             
             if (Double.isNaN(angSt) || Double.isNaN(angEnd)) {                
@@ -463,6 +494,14 @@ final public class DrawConic extends Drawable implements Previewable {
     }        
     
     final private void updateEllipse() {
+		// check for huge pixel radius
+		double xradius = halfAxes[0] * view.xscale;
+		double yradius = halfAxes[1] * view.yscale;
+		if (xradius > DrawConic.HUGE_RADIUS || yradius > DrawConic.HUGE_RADIUS) {
+			isVisible = false;
+			return;
+		}
+    	
         if (firstEllipse) {
             firstEllipse = false;
             if (ellipse == null) ellipse = new Ellipse2D.Double();               
@@ -474,7 +513,15 @@ final public class DrawConic extends Drawable implements Previewable {
         
         // set ellipse
         ellipse.setFrameFromCenter(0, 0, halfAxes[0], halfAxes[1]); 
-        shape = transform.createTransformedShape(ellipse);                                     
+        
+        // check for radius larger than screen
+        int BIG_RADIUS = view.width + view.height;
+		if (xradius < BIG_RADIUS && yradius < BIG_RADIUS) {
+			shape = transform.createTransformedShape(ellipse); 
+		} else {
+			// clip big arc at screen
+	        shape = ClipShape.clipToRect(ellipse, transform, new Rectangle(-1,-1,view.width+2, view.height+2));
+		}
 
         // set label coords
         labelCoords[0] = -halfAxes[0] / 2.0d;
@@ -621,7 +668,7 @@ final public class DrawConic extends Drawable implements Previewable {
             k2 = i * i;
         }
         x0 = k2/2 * conic.p; // x = k*p
-        y0 = i * conic.p;    // y = sqrt(2k p�) = i p                
+        y0 = i * conic.p;    // y = sqrt(2k p�) = i p 
         
 		//	set transform
 		transform.setTransform(view.coordTransform);
@@ -638,7 +685,7 @@ final public class DrawConic extends Drawable implements Previewable {
         parpoints[5] = -y0;
         transform.transform(parpoints, 0, parpoints, 0, 3);
         parabola.setCurve(parpoints, 0);
-        shape = parabola;                     
+        shape = parabola; 
 
         // set label coords
         labelCoords[0] = 2 * conic.p; 
@@ -769,7 +816,10 @@ final public class DrawConic extends Drawable implements Previewable {
 		}
 	}
     
-	final public boolean hit(int x, int y) {             
+	final public boolean hit(int x, int y) {    
+		if (!isVisible)
+			return false;
+		
         switch (type) {
             case GeoConic.CONIC_SINGLE_POINT:                         
                 return drawPoint.hit(x, y);                                

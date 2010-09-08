@@ -88,6 +88,7 @@ import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JApplet;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -119,9 +120,7 @@ public abstract class Application implements KeyEventDispatcher {
 	// supported GUI languages (from properties files)
 	public static ArrayList supportedLocales = new ArrayList();
 	static {
-		// TODO: remove IS_PRE_RELEASE
-		if (GeoGebra.IS_PRE_RELEASE)
-			supportedLocales.add(new Locale("sq")); // Albanian
+		supportedLocales.add(new Locale("sq")); // Albanian
 		
 		supportedLocales.add(new Locale("ar")); // Arabic
 		supportedLocales.add(new Locale("eu")); // Basque
@@ -156,6 +155,7 @@ public abstract class Application implements KeyEventDispatcher {
 		supportedLocales.add(new Locale("ko")); // Korean
 		supportedLocales.add(new Locale("lt")); // Lithuanian
 		supportedLocales.add(new Locale("mk")); // Macedonian
+		supportedLocales.add(new Locale("mr")); // Marati
 		// supportedLocales.add(new Locale("ne")); // Nepalese
 		supportedLocales.add(new Locale("no", "NO")); // Norwegian (Bokmal)
 		supportedLocales.add(new Locale("no", "NO", "NY")); // Norwegian(Nynorsk)
@@ -168,23 +168,17 @@ public abstract class Application implements KeyEventDispatcher {
 		supportedLocales.add(new Locale("ro")); // Romanian
 		supportedLocales.add(new Locale("ru")); // Russian
 		supportedLocales.add(new Locale("sr")); // Serbian
-		// TODO: remove IS_PRE_RELEASE
-		if (GeoGebra.IS_PRE_RELEASE)
-			supportedLocales.add(new Locale("si")); // Sinhala (Sri Lanka)
+		supportedLocales.add(new Locale("si")); // Sinhala (Sri Lanka)
 		
 		supportedLocales.add(new Locale("sk")); // Slovakian
 		supportedLocales.add(new Locale("sl")); // Slovenian
 		supportedLocales.add(new Locale("es")); // Spanish
 		supportedLocales.add(new Locale("sv")); // Swedish
 		// supportedLocales.add(new Locale("ty")); // Tahitian
-		// TODO: remove IS_PRE_RELEASE
-		if (GeoGebra.IS_PRE_RELEASE)
-			supportedLocales.add(new Locale("ta")); // Tamil
+		supportedLocales.add(new Locale("ta")); // Tamil
 		
 		// supportedLocales.add(new Locale("te")); // Telugu
-		// TODO: remove IS_PRE_RELEASE
-		if (GeoGebra.IS_PRE_RELEASE)
-			supportedLocales.add(new Locale("th")); // Thai
+		supportedLocales.add(new Locale("th")); // Thai
 
 		supportedLocales.add(new Locale("tr")); // Turkish
 		// supportedLocales.add(new Locale("uk")); // Ukrainian
@@ -3074,12 +3068,48 @@ public abstract class Application implements KeyEventDispatcher {
 	}
 
 	// check if we are on a mac
-	public static boolean MAC_OS = System.getProperty("os.name").toLowerCase(
-			Locale.US).startsWith("mac");
-	public static boolean WINDOWS = System.getProperty("os.name").toLowerCase(
-			Locale.US).startsWith("windows"); // Michael Borcherds 2008-03-21
+	public static String OS = System.getProperty("os.name").toLowerCase(Locale.US);
+	public static boolean MAC_OS = OS.startsWith("mac");
+	public static boolean WINDOWS = OS.startsWith("windows"); // Michael Borcherds 2008-03-21
+	
+			/* current possible values http://mindprod.com/jgloss/properties.html
+			 * AIX
+		Digital Unix
+		FreeBSD
+		HP UX
+		Irix
+		Linux
+		Mac OS
+		Mac OS X
+		MPE/iX
+		Netware 4.11
+		OS/2
+		Solaris
+		Windows 2000
+		Windows 7
+		Windows 95
+		Windows 98
+		Windows NT
+		Windows Vista
+		Windows XP */
+	
+	// make sure still works in the future on eg Windows 9 
+	public static boolean WINDOWS_VISTA_OR_LATER = WINDOWS && !OS.startsWith("windows 2000")
+														   && !OS.startsWith("windows 95")
+														   && !OS.startsWith("windows 98")
+														   && !OS.startsWith("windows nt")
+														   && !OS.startsWith("windows xp");
 
 	/*
+	 * needed for padding in Windows XP or earlier
+	 * without check, checkbox isn't shown in Vista, Win 7
+	 */
+    public void setEmptyIcon(JCheckBoxMenuItem cb) {
+        if (!WINDOWS_VISTA_OR_LATER)
+                cb.setIcon(getEmptyIcon());
+    }
+
+    /*
 	 * check for alt pressed (but not ctrl) (or ctrl but not alt on MacOS)
 	 */
 	public static boolean isAltDown(InputEvent e) {

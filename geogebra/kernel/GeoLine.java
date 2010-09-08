@@ -177,6 +177,13 @@ Translateable,PointRotateable, Mirrorable, Dilateable, LineProperties {
         return kernel.isEqual(g.x * y, g.y * x);        
     }
     
+    /** returns true if this line and g are parallel (signed)*/
+    final public boolean isSameDirection(GeoLine g) {        
+    	// check x and g.x have the same sign
+    	// also y and g.y
+        return (g.x * x >= 0) && (g.y * y >= 0) && isParallel(g);        
+    }
+    
     /** returns true if this line and g are perpendicular */
     final public boolean isPerpendicular(GeoLine g) {        
         return kernel.isEqual(g.x * x, -g.y * y);        
@@ -321,6 +328,7 @@ Translateable,PointRotateable, Mirrorable, Dilateable, LineProperties {
 	// Michael Borcherds 2008-04-30
 	public boolean isEqual(GeoElement geo) {
 		// return false if it's a different type, otherwise use equals() method
+		if (geo.isGeoRay() || geo.isGeoSegment()) return false;
 		if (geo.isGeoLine()) return linDep((GeoLine)geo); else return false;
 	}
 
