@@ -299,87 +299,17 @@ public abstract class MenubarImpl extends JMenuBar implements Menubar {
 		add(menuFile);
 		
 		// Edit
-		menu = editMenu();
-		editMenu = editMenu();
-		
-		add(menu);
-
-		// View
-		menu = viewMenu(true);
-		viewMenu = viewMenu(false);
-		
-		add(menu);
-
-		// Options
-		menu = optionsMenu(true);
-		optionsMenu = optionsMenu(false);
-
-		add(menu);
-
-		
-		if (app.isStandaloneApplication() && Application.hasFullPermissions()) 
-		{
-			// Preferences
-			menu.addSeparator();
-			//submenu = new JMenu(app.getMenu("Settings"));			
-			menu.add(savePreferencesAction);
-			menu.add(clearPreferencesAction);
-			//menu.add(submenu);
-		}
-		
-		
-		// tools menu		
-		menuTools = new JMenu(app.getMenu("Tools"));
-		add(menuTools);
-		menuTools.add(showCreateToolsAction);
-		menuTools.add(showManageToolsAction);
-		menuTools.addSeparator();
-		menuTools.add(toolbarConfigAction);
-
-		if (app.isStandaloneApplication() && app.hasFullPermissions()) 
-		{
-			// windows menu
-			menuWindow = new JMenu(app.getMenu("Window"));
-			updateMenuWindow();
-			add(menuWindow);
-						
-			if (app.getPluginManager() != null) {			
-				javax.swing.JMenu pim=app.getPluginManager().getPluginMenu();
-				if(pim!=null){ add(pim);}     // H-P Ulven 2008-04-17
-			}
-		}
-
-		// help
-		menu = new JMenu(app.getMenu("Help"));
-		menu.add(helpAction);
-		menu.addSeparator();
-
-		menu.add(websiteAction);
-		menu.add(forumAction);
-		menu.add(wikiAction);
-
-		menu.addSeparator();
-
-		menu.add(infoAction);
-		add(menu);
-		
-		updateMenubar();
-	}
-
-	private JMenu editMenu() {
-		JMenu menu;
-		JMenuItem mi;
 		menu = new JMenu(app.getMenu("Edit"));
 		if (app.isUndoActive()) {
 			mi = menu.add(app.getGuiManager().getUndoAction());
-//			setMenuShortCutAccelerator(mi, 'Z');
+			setMenuShortCutAccelerator(mi, 'Z');
 			mi = menu.add(app.getGuiManager().getRedoAction());
-//			if (Application.MAC_OS)
-//				// Command-Shift-Z
-//				setMenuShortCutShiftAccelerator(mi, 'Z');
-//			else
-//				// Ctrl-Y
-//				setMenuShortCutAccelerator(mi, 'Y');
+			if (Application.MAC_OS)
+				// Command-Shift-Z
+				setMenuShortCutShiftAccelerator(mi, 'Z');
+			else
+				// Ctrl-Y
+				setMenuShortCutAccelerator(mi, 'Y');
 			menu.addSeparator();
 		}
 		
@@ -401,43 +331,105 @@ public abstract class MenubarImpl extends JMenuBar implements Menubar {
 		setMenuShortCutAccelerator(mi, 'A');
 		
 		mi = menu.add(selectCurrentLayerAction);
-//		setMenuShortCutAccelerator(mi, 'L');
+		setMenuShortCutAccelerator(mi, 'L');
 		
 		mi = menu.add(selectAllDescendantsAction);
-//		setMenuShortCutShiftAccelerator(mi, 'J'); // changed from 'Q' - doesn't work on MacOS
+		setMenuShortCutShiftAccelerator(mi, 'J'); // changed from 'Q' - doesn't work on MacOS
 		
 		mi = menu.add(selectAllAncestorsAction);
-//		setMenuShortCutAccelerator(mi, 'J'); // changed from 'Q' - doesn't work on MacOS
+		setMenuShortCutAccelerator(mi, 'J'); // changed from 'Q' - doesn't work on MacOS
 		
 		menu.addSeparator();
 		
 		if (app.hasFullPermissions()) {
 			// Michael Borcherds 2008-03-03 added to Edit menu
 			mi = menu.add(drawingPadToClipboardAction);
-//			setMenuShortCutShiftAccelerator(mi, 'C');
+			setMenuShortCutShiftAccelerator(mi, 'C');
 			menu.addSeparator();
 		}
 
 		mi = menu.add(propertiesAction);
-//		setMenuShortCutAccelerator(mi, 'E');
-		return menu;
-	}
+		setMenuShortCutAccelerator(mi, 'E');
+		add(menu);
+		this.editMenu = menu;
+
+		// View
+		menu = new JMenu(app.getMenu("View"));
+		cbShowAxes = new JCheckBoxMenuItem(app.getGuiManager().getShowAxesAction());		
+		cbShowAxes.setSelected(app.getEuclidianView().getShowXaxis()
+				&& app.getEuclidianView().getShowYaxis());
+		menu.add(cbShowAxes);
+
+		cbShowGrid = new JCheckBoxMenuItem(app.getGuiManager().getShowGridAction());
+		cbShowGrid.setSelected(app.getEuclidianView().getShowGrid());
+		menu.add(cbShowGrid);
+		menu.addSeparator();
+
+		cbShowAlgebraView = new JCheckBoxMenuItem(showAlgebraViewAction);		
 		app.setEmptyIcon(cbShowAlgebraView);
+		cbShowAlgebraView.setSelected(app.showAlgebraView());
+		setMenuShortCutShiftAccelerator(cbShowAlgebraView, 'A');
+		menu.add(cbShowAlgebraView);
+
+	    // Michael Borcherds 2008-01-14
+		cbShowSpreadsheet = new JCheckBoxMenuItem(showSpreadsheetAction);		
 		app.setEmptyIcon(cbShowSpreadsheet);
+		cbShowSpreadsheet.setSelected(app.showSpreadsheetView());	
+		setMenuShortCutShiftAccelerator(cbShowSpreadsheet, 'S');
+		menu.add(cbShowSpreadsheet);		
+		
+		cbShowAuxiliaryObjects = new JCheckBoxMenuItem(
+				showAuxiliaryObjectsAction);
 		app.setEmptyIcon(cbShowAuxiliaryObjects);
+		cbShowAuxiliaryObjects.setSelected(app.showAuxiliaryObjects());
+		menu.add(cbShowAuxiliaryObjects);
+
+		cbHorizontalSplit = new JCheckBoxMenuItem(horizontalSplitAction);				
 		app.setEmptyIcon(cbHorizontalSplit);
+		menu.add(cbHorizontalSplit);
+
+		menu.addSeparator();
+
+		// show/hide cmdlist, algebra input
 		cbShowAlgebraInput = new JCheckBoxMenuItem(showAlgebraInputAction);	
 		app.setEmptyIcon(cbShowAlgebraInput);
+		menu.add(cbShowAlgebraInput);
+
 		cbShowCmdList = new JCheckBoxMenuItem(showCmdListAction);	
 		app.setEmptyIcon(cbShowCmdList);
-		app.setEmptyIcon(cbShowConsProtNavigation);
-		app.setEmptyIcon(cbShowConsProtNavigationPlay);
-		app.setEmptyIcon(cbShowConsProtNavigationOpenProt);
+		menu.add(cbShowCmdList);
+		menu.addSeparator();
 
-	private JMenu optionsMenu(boolean inMenuBar) {
-		JMenu menu;
-		JMenu submenu;
-		int pos;
+		// Construction Protocol
+		cbShowConsProtNavigation = new JCheckBoxMenuItem(
+				showConsProtNavigationAction);
+		app.setEmptyIcon(cbShowConsProtNavigation);
+		cbShowConsProtNavigationPlay = new JCheckBoxMenuItem(
+				showConsProtNavigationPlayAction);
+		app.setEmptyIcon(cbShowConsProtNavigationPlay);
+		cbShowConsProtNavigationOpenProt = new JCheckBoxMenuItem(
+				showConsProtNavigationOpenProtAction);	
+		app.setEmptyIcon(cbShowConsProtNavigationOpenProt);
+		menu.add(constProtocolAction);
+		menu.add(cbShowConsProtNavigation);
+		menu.add(cbShowConsProtNavigationPlay);
+		menu.add(cbShowConsProtNavigationOpenProt);		
+		
+		menu.addSeparator();
+		mi = menu.add(refreshAction);
+		setMenuShortCutAccelerator(mi, 'F');
+		
+		mi = menu.add(recomputeAllViews);
+		setMenuShortCutAccelerator(mi, 'R');
+		//KeyStroke ks = KeyStroke.getKeyStroke(KeyEvent.VK_R, 
+		//		Application.MAC_OS ? InputEvent.META_MASK : 0 );
+		//mi.setAccelerator(ks);
+		
+		
+		add(menu);
+		this.viewMenu = menu;
+
+		// Options
 		menu = new JMenu(app.getMenu("Options"));
 		
 		//G.Sturr 2009-10-18
@@ -650,96 +642,70 @@ public abstract class MenubarImpl extends JMenuBar implements Menubar {
 
 		//menu.addSeparator();
 
-		if (inMenuBar) {
-			// Language
-			if (app.propertiesFilesPresent()) {
-				LanguageActionListener langListener = new LanguageActionListener();
-				submenu = new JMenu(app.getMenu("Language"));
-				submenu.setIcon(app.getImageIcon("globe.png"));
-				addLanguageMenuItems(submenu, langListener);
-				menu.add(submenu);
+		// Language		
+		if (app.propertiesFilesPresent()) {
+			LanguageActionListener langListener = new LanguageActionListener();
+			submenu = new JMenu(app.getMenu("Language"));
+			submenu.setIcon(app.getImageIcon("globe.png"));
+			addLanguageMenuItems(submenu, langListener);
+			menu.add(submenu);
+		}
+		
+		menu.addSeparator();
+
+		// drawing pad properteis
+		menu.add(drawingPadPropAction);
+		add(menu);
+		this.optionsMenu = menu;
+
+		
+		if (app.isStandaloneApplication() && Application.hasFullPermissions()) 
+		{
+			// Preferences
+			menu.addSeparator();
+			//submenu = new JMenu(app.getMenu("Settings"));			
+			menu.add(savePreferencesAction);
+			menu.add(clearPreferencesAction);
+			//menu.add(submenu);
+		}
+		
+		
+		// tools menu		
+		menuTools = new JMenu(app.getMenu("Tools"));
+		add(menuTools);
+		menuTools.add(showCreateToolsAction);
+		menuTools.add(showManageToolsAction);
+		menuTools.addSeparator();
+		menuTools.add(toolbarConfigAction);
+
+		if (app.isStandaloneApplication() && app.hasFullPermissions()) 
+		{
+			// windows menu
+			menuWindow = new JMenu(app.getMenu("Window"));
+			updateMenuWindow();
+			add(menuWindow);
+						
+			if (app.getPluginManager() != null) {			
+				javax.swing.JMenu pim=app.getPluginManager().getPluginMenu();
+				if(pim!=null){ add(pim);}     // H-P Ulven 2008-04-17
 			}
-
-			menu.addSeparator();
-
-			// drawing pad properteis
-			menu.add(drawingPadPropAction);
 		}
-		return menu;
-	}
 
-	private JMenu viewMenu(boolean inMenuBar) {
-		JMenu menu;
-		JMenuItem mi;
-		menu = new JMenu(app.getMenu("View"));
-		if (inMenuBar) {
-			cbShowAxes = new JCheckBoxMenuItem(app.getGuiManager()
-					.getShowAxesAction());
-			cbShowAxes.setSelected(app.getEuclidianView().getShowXaxis()
-					&& app.getEuclidianView().getShowYaxis());
-			menu.add(cbShowAxes);
-			
-			cbShowGrid = new JCheckBoxMenuItem(app.getGuiManager()
-					.getShowGridAction());
-			cbShowGrid.setSelected(app.getEuclidianView().getShowGrid());
-			menu.add(cbShowGrid);
-			menu.addSeparator();
-		}
-		cbShowAlgebraView = new JCheckBoxMenuItem(showAlgebraViewAction);		
-		cbShowAlgebraView.setIcon(app.getEmptyIcon());
-		cbShowAlgebraView.setSelected(app.showAlgebraView());
-		// setMenuShortCutShiftAccelerator(cbShowAlgebraView, 'A');
-		menu.add(cbShowAlgebraView);
+		// help
+		menu = new JMenu(app.getMenu("Help"));
+		menu.add(helpAction);
+		menu.addSeparator();
 
-	    // Michael Borcherds 2008-01-14
-		cbShowSpreadsheet = new JCheckBoxMenuItem(showSpreadsheetAction);		
-		cbShowSpreadsheet.setIcon(app.getEmptyIcon());
-		cbShowSpreadsheet.setSelected(app.showSpreadsheetView());	
-		// setMenuShortCutShiftAccelerator(cbShowSpreadsheet, 'S');
-		menu.add(cbShowSpreadsheet);		
-		
-		cbShowAuxiliaryObjects = new JCheckBoxMenuItem(
-				showAuxiliaryObjectsAction);
-		cbShowAuxiliaryObjects.setIcon(app.getEmptyIcon());
-		cbShowAuxiliaryObjects.setSelected(app.showAuxiliaryObjects());
-		menu.add(cbShowAuxiliaryObjects);
-
-		cbHorizontalSplit = new JCheckBoxMenuItem(horizontalSplitAction);				
-		cbHorizontalSplit.setIcon(app.getEmptyIcon());
-		menu.add(cbHorizontalSplit);
+		menu.add(websiteAction);
+		menu.add(forumAction);
+		menu.add(wikiAction);
 
 		menu.addSeparator();
 
-		// show/hide cmdlist, algebra input
-		cbShowAlgebraInput = new JCheckBoxMenuItem(showAlgebraInputAction);		
-		menu.add(cbShowAlgebraInput);
-
-		cbShowCmdList = new JCheckBoxMenuItem(showCmdListAction);		
-		menu.add(cbShowCmdList);
-		menu.addSeparator();
-
-		// Construction Protocol
-		cbShowConsProtNavigation = new JCheckBoxMenuItem(
-				showConsProtNavigationAction);
-		cbShowConsProtNavigationPlay = new JCheckBoxMenuItem(
-				showConsProtNavigationPlayAction);
-		cbShowConsProtNavigationOpenProt = new JCheckBoxMenuItem(
-				showConsProtNavigationOpenProtAction);	
-		menu.add(constProtocolAction);
-		menu.add(cbShowConsProtNavigation);
-		menu.add(cbShowConsProtNavigationPlay);
-		menu.add(cbShowConsProtNavigationOpenProt);		
+		menu.add(infoAction);
+		add(menu);
 		
-		menu.addSeparator();
-		mi = menu.add(refreshAction);
-		// setMenuShortCutAccelerator(mi, 'F');
-		
-		mi = menu.add(recomputeAllViews);
-		// setMenuShortCutAccelerator(mi, 'R');
-		//KeyStroke ks = KeyStroke.getKeyStroke(KeyEvent.VK_R, 
-		//		Application.MAC_OS ? InputEvent.META_MASK : 0 );
-		//mi.setAccelerator(ks);
-		return menu;
+		updateMenubar();
 	}
 
 	protected void initActions() {				
