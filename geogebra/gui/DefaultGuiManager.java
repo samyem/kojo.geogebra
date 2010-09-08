@@ -112,6 +112,7 @@ public class DefaultGuiManager implements GuiManager {
 	private MyToolbar appToolbarPanel;	  
     private String strCustomToolbarDefinition;
     private Locale currentLocale;
+    private boolean htmlLoaded;//added by Zbynek Konecny, 2010-05-28 (see #126)
 
 	// Actions
 	private AbstractAction showAxesAction, showGridAction, undoAction,
@@ -125,6 +126,9 @@ public class DefaultGuiManager implements GuiManager {
 		//if (!app.isApplet())
 		
 		initAlgebraController(); // needed for keyboard input in EuclidianView
+
+		//Zbynek Konecny, 2010-05-28 (see #126)
+		htmlLoaded=false;
 	}
 	
 	public boolean isPropertiesDialogSelectionListener() {
@@ -1404,7 +1408,7 @@ public class DefaultGuiManager implements GuiManager {
 			}
 			// <-- Modified for Intergeo File Format (Yves Kreis)
 
-			if (app.getCurrentFile() == null) {
+			if (app.getCurrentFile() == null && !htmlLoaded) { //edited by Zbynek Konecny, 2010-05-28 (see #126)
 				app.setCurrentFile(oldCurrentFile);
 			}
 			fileChooser.setMultiSelectionEnabled(false);
@@ -1420,6 +1424,8 @@ public class DefaultGuiManager implements GuiManager {
 
 	public synchronized void doOpenFiles(File[] files,
 			boolean allowOpeningInThisInstance, String extension) {
+		//Zbynek Konecny, 2010-05-28 (see #126)
+		htmlLoaded=false;
 		// <-- Added for Intergeo File Format (Yves Kreis)
 		// there are selected files
 		if (files != null) {
@@ -1449,7 +1455,9 @@ public class DefaultGuiManager implements GuiManager {
 						} else 	if (Application.FILE_EXT_HTML.equals(ext) 
 								|| Application.FILE_EXT_HTM.equals(ext) ) {
 							// load HTML file with applet param ggbBase64
-							loadBase64File(file);
+							//if we loaded from GGB, we don't want to overwrite old file
+							//next line Zbynek Konecny, 2010-05-28 (#126)
+							htmlLoaded=loadBase64File(file); 
 						} else {
 						// standard GeoGebra file
 						GeoGebraFrame inst = GeoGebraFrame.getInstanceWithFile(file);

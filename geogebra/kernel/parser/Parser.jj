@@ -173,7 +173,7 @@ TOKEN : {
         | "." <INTEGER> 
         | <INTEGER> "."
         >
- |     < EFLOAT: <FLOAT> "E"  (<MINUS>)? <INTEGER> >
+ |     < EFLOAT: <FLOAT> ( "E" | "e" ) (<PLUS>|<MINUS>)? <INTEGER> >
   |     < #INTEGER: ( <DIGIT> )+ >
   |     < #DIGIT:                                     // unicode digits
        [
@@ -238,13 +238,13 @@ TOKEN: {
 |	< COS_FUNC: ( "cos(" | "Cos(" ) > 
 |	< SIN_FUNC: ( "sin(" | "Sin(" ) > 
 |	< TAN_FUNC: ( "tan(" | "Tan(" ) > 
-|	< ACOS_FUNC: ( "acos(" | "arccos(" | "ArcCos(" )> 
+|	< ACOS_FUNC: ( "acos(" | "arccos(" | "arcos(" | "ArcCos(" )> 
 |	< ASIN_FUNC: ( "asin(" | "arcsin(" | "ArcSin(" ) > 
 |	< ATAN_FUNC: ( "atan(" | "arctan(" | "ArcTan(" )> 
 |	< COSH_FUNC: ( "cosh(" | "Cosh(" ) > 
 |	< SINH_FUNC: ( "sinh(" | "Sinh(" ) > 
 |	< TANH_FUNC: ( "tanh(" | "Tanh(" ) > 
-|	< ACOSH_FUNC: ( "acosh(" | "arccosh(" | "ArcCosh(" ) > 
+|	< ACOSH_FUNC: ( "acosh(" | "arccosh(" | "arcosh(" | "ArcCosh(" ) > 
 |	< ASINH_FUNC: ( "asinh(" | "arcsinh(" | "ArcSinh(" ) > 
 |	< ATANH_FUNC: ( "atanh(" | "arctanh(" | "ArcTanh(" ) > 
 |	< EXP_FUNC: ( "exp(" | "Exp(" ) > 

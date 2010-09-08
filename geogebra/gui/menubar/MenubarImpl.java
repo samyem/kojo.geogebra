@@ -331,45 +331,50 @@ public abstract class MenubarImpl extends JMenuBar implements Menubar {
 		menu.addSeparator();
 
 		cbShowAlgebraView = new JCheckBoxMenuItem(showAlgebraViewAction);		
-		cbShowAlgebraView.setIcon(app.getEmptyIcon());
+		app.setEmptyIcon(cbShowAlgebraView);
 		cbShowAlgebraView.setSelected(app.showAlgebraView());
 		setMenuShortCutShiftAccelerator(cbShowAlgebraView, 'A');
 		menu.add(cbShowAlgebraView);
 
 	    // Michael Borcherds 2008-01-14
 		cbShowSpreadsheet = new JCheckBoxMenuItem(showSpreadsheetAction);		
-		cbShowSpreadsheet.setIcon(app.getEmptyIcon());
+		app.setEmptyIcon(cbShowSpreadsheet);
 		cbShowSpreadsheet.setSelected(app.showSpreadsheetView());	
 		setMenuShortCutShiftAccelerator(cbShowSpreadsheet, 'S');
 		menu.add(cbShowSpreadsheet);		
 		
 		cbShowAuxiliaryObjects = new JCheckBoxMenuItem(
 				showAuxiliaryObjectsAction);
-		cbShowAuxiliaryObjects.setIcon(app.getEmptyIcon());
+		app.setEmptyIcon(cbShowAuxiliaryObjects);
 		cbShowAuxiliaryObjects.setSelected(app.showAuxiliaryObjects());
 		menu.add(cbShowAuxiliaryObjects);
 
 		cbHorizontalSplit = new JCheckBoxMenuItem(horizontalSplitAction);				
-		cbHorizontalSplit.setIcon(app.getEmptyIcon());
+		app.setEmptyIcon(cbHorizontalSplit);
 		menu.add(cbHorizontalSplit);
 
 		menu.addSeparator();
 
 		// show/hide cmdlist, algebra input
-		cbShowAlgebraInput = new JCheckBoxMenuItem(showAlgebraInputAction);		
+		cbShowAlgebraInput = new JCheckBoxMenuItem(showAlgebraInputAction);	
+		app.setEmptyIcon(cbShowAlgebraInput);
 		menu.add(cbShowAlgebraInput);
 
-		cbShowCmdList = new JCheckBoxMenuItem(showCmdListAction);		
+		cbShowCmdList = new JCheckBoxMenuItem(showCmdListAction);	
+		app.setEmptyIcon(cbShowCmdList);
 		menu.add(cbShowCmdList);
 		menu.addSeparator();
 
 		// Construction Protocol
 		cbShowConsProtNavigation = new JCheckBoxMenuItem(
 				showConsProtNavigationAction);
+		app.setEmptyIcon(cbShowConsProtNavigation);
 		cbShowConsProtNavigationPlay = new JCheckBoxMenuItem(
 				showConsProtNavigationPlayAction);
+		app.setEmptyIcon(cbShowConsProtNavigationPlay);
 		cbShowConsProtNavigationOpenProt = new JCheckBoxMenuItem(
 				showConsProtNavigationOpenProtAction);	
+		app.setEmptyIcon(cbShowConsProtNavigationOpenProt);
 		menu.add(constProtocolAction);
 		menu.add(cbShowConsProtNavigation);
 		menu.add(cbShowConsProtNavigationPlay);
@@ -690,8 +695,7 @@ public abstract class MenubarImpl extends JMenuBar implements Menubar {
 			}
 		};
 
-		showAlgebraInputAction = new AbstractAction(app.getMenu("InputField"),
-				app.getEmptyIcon()) {
+		showAlgebraInputAction = new AbstractAction(app.getMenu("InputField")) {
 			private static final long serialVersionUID = 1L;
 
 			public void actionPerformed(ActionEvent e) {
@@ -702,8 +706,7 @@ public abstract class MenubarImpl extends JMenuBar implements Menubar {
 			}
 		};
 
-		showCmdListAction = new AbstractAction(app.getMenu("CmdList"),
-				app.getEmptyIcon()) {
+		showCmdListAction = new AbstractAction(app.getMenu("CmdList")) {
 			private static final long serialVersionUID = 1L;
 
 			public void actionPerformed(ActionEvent e) {
@@ -739,8 +742,7 @@ public abstract class MenubarImpl extends JMenuBar implements Menubar {
 		};
 
 		showConsProtNavigationAction = new AbstractAction(
-				app.getPlain("ConstructionProtocolNavigation"),
-				app.getEmptyIcon()) {
+				app.getPlain("ConstructionProtocolNavigation")) {
 			private static final long serialVersionUID = 1L;
 
 			public void actionPerformed(ActionEvent e) {
@@ -753,8 +755,7 @@ public abstract class MenubarImpl extends JMenuBar implements Menubar {
 		};
 
 		showConsProtNavigationPlayAction = new AbstractAction(
-				app.getPlain("PlayButton"),
-				app.getEmptyIcon()) {
+				app.getPlain("PlayButton")) {
 			private static final long serialVersionUID = 1L;
 
 			public void actionPerformed(ActionEvent e) {
@@ -770,8 +771,7 @@ public abstract class MenubarImpl extends JMenuBar implements Menubar {
 		};
 
 		showConsProtNavigationOpenProtAction = new AbstractAction(
-				app.getPlain("ConstructionProtocolButton"),
-				app.getEmptyIcon()) {
+				app.getPlain("ConstructionProtocolButton")) {
 			private static final long serialVersionUID = 1L;
 
 			public void actionPerformed(ActionEvent e) {
@@ -1755,6 +1755,6 @@ public abstract class MenubarImpl extends JMenuBar implements Menubar {
         }
     }
     
-    
+
   
 }

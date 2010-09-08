@@ -25,6 +25,8 @@ public GeoElement[] process(Command c) throws MyError {
 
     arg = resArgs(c);
     switch (n) {
+    	case 0:
+    		throw argNumErr(app, "Polygon", n);
     	case 3:        
         // regular polygon
         if (arg[0].isGeoPoint() && 

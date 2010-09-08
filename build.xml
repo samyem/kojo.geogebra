@@ -38,9 +38,9 @@ office@geogebra.org
 	
 	<property name="src.dir" location="."/>
 	<property name="propertiessrc.dir" location="./geogebra/properties"/>
-	<property name="propertiestemp.dir" location="../build/tempproperties"/>
-	<property name="build.dir" location="../build"/>
-	<property name="temp.dir" location="../build/temp"/>
+	<property name="propertiestemp.dir" location="../buildggb32/tempproperties"/>
+	<property name="build.dir" location="../buildggb32"/>
+	<property name="temp.dir" location="../buildggb32/temp"/>
 	<property name="workspace.dir" location="../"/>
     			
 	<!-- build signed and unsigned GeoGebra jar files -->
@@ -76,7 +76,7 @@ office@geogebra.org
 		<mkdir dir="${build.dir}/unsigned/unpacked"/>
 		<mkdir dir="${propertiestemp.dir}"/>
 		<delete>
-		    <fileset dir="${build.dir}" includes="**/geogebra*.jar, **/gluegen-rt.jar, **/jogl.jar, **/jlatexmath.jar ,**/*.jar.pack.gz, **/*.html"/>
+		    <fileset dir="${build.dir}" includes="**/geogebra*.jar, **/gluegen-rt.jar, **/jogl.jar, **/jlatexmath.jar, **/jlm_*.jar,**/*.jar.pack.gz, **/*.html"/>
 		</delete>		
 	</target>
 	
@@ -468,7 +468,7 @@ office@geogebra.org
 				build="${build}"
 				bundleid="geogebra.GeoGebra"
 				icon="installer/geogebra.icns"
-				infostring="GeoGebra ${fullversion}, (C) 2001-2009 International GeoGebra Institute"
+				infostring="GeoGebra ${fullversion}, (C) 2001-2010 International GeoGebra Institute"
 				jvmversion="1.4.2+"
 				shortname="GeoGebra"
 				signature="GGB"
@@ -498,4 +498,66 @@ office@geogebra.org
 		</zip>
 		<delete dir="${build.dir}/installer/macosx" />
 	</target>
+	
+	
+	<!--builds Debian package -->
+	<target name="package" depends="readVersion">
+		<taskdef name="deb" classname="com.googlecode.ant_deb_task.Deb" 
+					classpath="ant-deb-0.0.1.jar"/>
+		
+		
+	    <property name="deb.tree" value="${build.dir}/deb"/>
+		<property name="deb.version" value="${fullversion}"/>
+		<property name="deb.packages" value="${build.dir}/packages"/>
+		<property name="deb.package" value="${deb.packages}/geogebra_${deb.version}_all.deb"/>
+		<mkdir dir="${deb.packages}"/>
+		
+	    
+		
+		<deb toDir="${deb.packages}" postinst="unix/debcontrol/postinst"
+			package="geogebra"
+			version="${deb.version}"
+			postrm="unix/debcontrol/postrm"
+			section="math"
+			priority="optional"
+			maintainer="Markus Hohenwarter &lt;markus@geogebra.org>"
+			architecture="all"
+			recommends="sun-java6-jre | sun-java5-jre, imagemagick"
+			depends="sun-java6-jre | sun-java5-jre | default-jre"
+			packageEntry="${deb.packages}/Packages"
+			repoLocation=""
+			>
+			<description synopsis="Dynamic mathematics software for all levels of education">
+ GeoGebra joins arithmetic, geometry, algebra and calculus. It offers multiple
+ representations of objects in its graphics, algebra, and spreadsheet views
+ that are all dynamically linked.
+ This package also contains a thumbnailer for .ggb files which runs only when
+ imagemagick is installed. 
+			</description>
+		 	<tarfileset dir="${src.dir}/unix/usr/share" prefix="./usr/share"/>
+			<tarfileset dir="${src.dir}/unix/usr/bin" prefix="./usr/bin" filemode="755"/>
+		 	<tarfileset dir="${build.dir}/unpacked" prefix="./usr/share/geogebra/lib"/>
+			<tarfileset dir="${build.dir}/unsigned/unpacked" prefix="./usr/share/geogebra/lib/unsigned"/>
+		</deb>
+			
+			
+		</target>
+		
+		<!-- makes necessary Release & Packages files for Debian repo-->
+		<target name="release" depends="package">
+			<gzip src="${deb.packages}/Packages" destfile="${deb.packages}/Packages.gz"/>
+			<length file="${deb.packages}/Packages" property="packplain.size"/>
+			<length file="${deb.packages}/Packages.gz" property="packgz.size"/>
+			<checksum file="${deb.packages}/Packages" algorithm="MD5" property="packplain.md5"/>
+			<checksum file="${deb.packages}/Packages.gz" algorithm="MD5" property="packgz.md5"/>
+			<copy todir="${deb.packages}">
+				<fileset file="unix/debrelease/Release"/>
+				<filterset begintoken="[[" endtoken="]]">
+					<filter token="plain.size" value="${packplain.size}"/>
+					<filter token="gz.size" value="${packgz.size}"/>
+					<filter token="plain.md5" value="${packplain.md5}"/>
+					<filter token="gz.md5" value="${packgz.md5}"/>
+				</filterset>
+			</copy>
+		</target>
 </project>

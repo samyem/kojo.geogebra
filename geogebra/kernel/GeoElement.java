@@ -866,6 +866,7 @@ public abstract class GeoElement
 	 */
 	public void setVisualStyleForTransformations(GeoElement geo) {
 		setVisualStyle(geo);
+		update();
 	}
 	
 	public void setVisualStyle(GeoElement geo) {					
@@ -1568,11 +1569,18 @@ public abstract class GeoElement
 				i++;
 				ch = caption.charAt(i);
 				switch (ch) {
-				case 'v': captionSB.append(toValueString());
+				case 'v': 	captionSB.append(toValueString());
 				break;
-				case 'n' : captionSB.append(getLabel());
+				case 'n' : 	captionSB.append(getLabel());
 				break;
-				default : captionSB.append(ch);
+				case 'x' : 	captionSB.append(isGeoPoint() ? kernel.format(((GeoPoint)this).inhomX) : "%x");
+				break;
+				case 'y' : 	captionSB.append(isGeoPoint() ? kernel.format(((GeoPoint)this).inhomY) : "%y");
+				break;
+				case 'z' : 	captionSB.append(isGeoPoint() ? "0" : "%z");
+				break;
+				default : 	captionSB.append('%');
+							captionSB.append(ch);
 				}
 			} else {
 				captionSB.append(ch);
@@ -2050,10 +2058,24 @@ public abstract class GeoElement
 		// remove this object from List
 		if (isIndependent()) 
 			cons.removeFromConstructionList(this);
+		
+		// remove Listeners
+		AlgoElement algo = getParentAlgorithm();
+		if (algo instanceof EuclidianViewAlgo) {
+			cons.unregisterEuclidianViewAlgo((EuclidianViewAlgo)algo);
+		}
+
+		if (condShowObject != null) {
+			condShowObject.unregisterConditionListener(this);
+		}
+				
+		if (colFunction != null) {
+			colFunction.unregisterColorFunctionListener(this);
+		}
+
 
 		// remove all dependent algorithms		
 		if (algorithmList != null) {
-			AlgoElement algo;
 			Object[] algos = algorithmList.toArray();
 			for (int i = 0; i < algos.length; i++) {
 				algo = (AlgoElement) algos[i];
@@ -2067,8 +2089,8 @@ public abstract class GeoElement
 		}
 
 		// remove from selection
-		app.removeSelectedGeo(this, false);					
-				
+		app.removeSelectedGeo(this, false);		
+		
 		// notify views before we change labelSet
 		notifyRemove();
 		
@@ -2561,12 +2583,20 @@ public abstract class GeoElement
 	
 	public String addLabelTextOrHTML(String desc) {
 		String ret; 
-		if (desc.startsWith(label+" ")) {
+		
+		boolean includesEqual = desc.indexOf('=') >= 0;
+		
+		// check for function in desc like "f(x) = x^2" 
+		if (includesEqual && desc.startsWith(label + '(')) {
 			ret = desc;
-		} else {
+		} 
+		else {
 			StringBuffer sb = new StringBuffer();
 			sb.append(label);
-			sb.append(" = ");
+			if (includesEqual)
+				sb.append(": ");
+			else
+				sb.append(" = ");
 			sb.append(desc);
 			ret = sb.toString();
 		}
@@ -3568,7 +3598,7 @@ public abstract class GeoElement
 		}		
 	}
 	
-	public final void removeColorFunction() {
+	public void removeColorFunction() {
 		// unregister old condition
 		if (colFunction != null) {
 			colFunction.unregisterColorFunctionListener(this);

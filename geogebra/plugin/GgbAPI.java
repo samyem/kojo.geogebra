@@ -22,6 +22,7 @@ import geogebra.kernel.GeoVector;
 import geogebra.kernel.Kernel;
 import geogebra.kernel.PointProperties;
 import geogebra.kernel.Traceable;
+import geogebra.kernel.arithmetic.MyBoolean;
 import geogebra.kernel.arithmetic.NumberValue;
 import geogebra.kernel.commands.AlgebraProcessor;
 import geogebra.main.Application;
@@ -230,11 +231,23 @@ public class GgbAPI {
 	public synchronized boolean evalCommand(String cmdString) {
 		
 		//Application.debug("evalCommand called..."+cmdString);
+		GeoElement [] result;
 		
-		GeoElement [] result = kernel.getAlgebraProcessor().
-								processAlgebraCommand(cmdString, false);
-		// return success
-		return result != null;
+		if (cmdString.indexOf('\n') == -1) {
+			result = kernel.getAlgebraProcessor().processAlgebraCommand(cmdString, false);
+			// return success
+			return result != null;
+			
+		}
+
+		boolean ret = true;
+		String[] cmdStrings = cmdString.split("[\\n]+");
+		for (int i = 0 ; i < cmdStrings.length ; i++) {
+			result = kernel.getAlgebraProcessor().processAlgebraCommand(cmdStrings[i], false);
+			ret = ret & (result != null);
+		}
+		
+		return ret;
 	}
 
 	/**
@@ -302,7 +315,7 @@ public class GgbAPI {
 	public synchronized void openFile(String strURL) {
 		try {
 			String lowerCase = strURL.toLowerCase(Locale.US);
-			URL url = new URL(lowerCase);
+			URL url = new URL(strURL);
 			app.loadXML(url, lowerCase.endsWith(Application.FILE_EXT_GEOGEBRA_TOOL));
 		} catch (Exception e) {
 			e.printStackTrace();

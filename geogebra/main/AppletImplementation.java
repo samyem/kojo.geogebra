@@ -100,14 +100,14 @@ public abstract class AppletImplementation implements AppletImplementationInterf
 	protected AppletImplementation(JApplet applet) {
 		this.applet = applet;
 
-		// Allow rescaling eg ctrl+ ctrl- in Firefox
-		if (allowRescaling)	applet.addComponentListener(new java.awt.event.ComponentAdapter() {
+		// Allow rescaling/resizing eg ctrl+ ctrl- in Firefox
+		applet.addComponentListener(new java.awt.event.ComponentAdapter() {
 			public void componentResized(ComponentEvent e)
 			{
 				Component c = e.getComponent();
 				Application.debug("Applet resized to: "+c.getWidth()+", "+c.getHeight());
 				
-				if (!app.runningInFrame && app.onlyGraphicsViewShowing())
+				if (allowRescaling && !app.runningInFrame && app.onlyGraphicsViewShowing())
 				{
 					// use just horizontal scale factors
 					// under normal circumstances, these should be the same			
@@ -116,6 +116,7 @@ public abstract class AppletImplementation implements AppletImplementationInterf
 
 				}
 				
+				// these always need updating eg draw reset icon, play/pause icon
 				width = c.getWidth();
 				height = c.getHeight();
 				
@@ -384,12 +385,14 @@ public abstract class AppletImplementation implements AppletImplementationInterf
 		width = cp.getWidth();
 		height = cp.getHeight();	
 		
-		setInitialScaling();
+		if (originalWidth < 0) setInitialScaling();
 		
 		// set move mode
 		app.setMoveMode();			
 	}
 	
+	private int originalWidth = -1, originalHeight = -1;
+
 	/*
 	 * rescales if the width is not what's expected
 	 * eg if browser is zoomed
@@ -398,15 +401,19 @@ public abstract class AppletImplementation implements AppletImplementationInterf
 		if (allowRescaling) {			
 			if (!app.runningInFrame && app.onlyGraphicsViewShowing())
 			{
-				double zoomFactorX = (double)width / (double)app.getEuclidianView().getPreferredSize().getWidth();
-				double zoomFactorY = (double)height / (double)app.getEuclidianView().getPreferredSize().getHeight();
+				originalWidth = (int)ev.getPreferredSize().getWidth();
+				originalHeight = (int)ev.getPreferredSize().getHeight();
+				double zoomFactorX = (double)width / (double)originalWidth;
+				double zoomFactorY = (double)height / (double)originalHeight;
 				double zoomFactor = Math.min(zoomFactorX, zoomFactorY);
-				app.getEuclidianView().zoomAroundCenter(zoomFactor);
+				ev.zoomAroundCenter(zoomFactor);
+			} else {
+				originalWidth = width;
+				originalHeight = height;
 			}
 		}
 
 	}
-
 
 	
 //	/**
@@ -665,10 +672,11 @@ public abstract class AppletImplementation implements AppletImplementationInterf
 		// avoid security problems calling from JavaScript
 		MyBoolean ret = (MyBoolean)AccessController.doPrivileged(new PrivilegedAction() {
 			public Object run() {
+				// perform the security-sensitive operation here
+				
 				// make sure translated command names are loaded
 				app.initTranslatedCommands();
 				
-				// perform the security-sensitive operation here
 				return new MyBoolean(app.getGgbApi().evalCommand(cmdString));
 			}
 		});
@@ -766,8 +774,7 @@ public abstract class AppletImplementation implements AppletImplementationInterf
 				return;
 			}
 			app.loadXML(zipFile);
-			return;
-		}
+		} else
 		
 		// avoid security problems calling from JavaScript
 		AccessController.doPrivileged(new PrivilegedAction() {
@@ -788,6 +795,16 @@ public abstract class AppletImplementation implements AppletImplementationInterf
 
 			}
 		});
+		
+		if (allowRescaling) {
+			ev.setTemporarySize(originalHeight, originalWidth);
+			double zoomFactorX = (double)width / (double)originalWidth;
+			double zoomFactorY = (double)height / (double)originalHeight;
+			double zoomFactor = Math.min(zoomFactorX, zoomFactorY);
+			ev.zoomAroundCenter(zoomFactor);
+			ev.setTemporarySize(-1, -1);
+		}
+
 	}
 	
 	/**
@@ -1497,6 +1514,7 @@ public abstract class AppletImplementation implements AppletImplementationInterf
 		 * the specified arguments.
 		 */
 		private void notifyListeners(ArrayList listeners, Object [] args) {										
+			if (!listenersEnabled) return;
 			int size = listeners.size();
 			for (int i=0; i < size; i++) {
 				String jsFunction = (String) listeners.get(i);										
@@ -1509,6 +1527,7 @@ public abstract class AppletImplementation implements AppletImplementationInterf
 		 * @see registerUpdateListener()
 		 */
 		public void update(GeoElement geo) {						
+			if (!listenersEnabled) return;
 			// update listeners
 			if (updateListeners != null && geo.isLabelSet()) {
 				Object [] args = { geo.getLabel() };
@@ -1558,7 +1577,7 @@ public abstract class AppletImplementation implements AppletImplementationInterf
 			if (browserWindow != null)
 				browserWindow.call(jsFunction, args);
 		} catch (Exception e) {						
-			System.err.println("Error calling JavaScript function: " + jsFunction);
+			System.err.println("Warning: JavaScript function '"+jsFunction+"' not found");
 		}    
 	}	
 	
@@ -1573,6 +1592,15 @@ public abstract class AppletImplementation implements AppletImplementationInterf
 		}
 	}
 	
-	
+	boolean listenersEnabled = true;	
+	public void disableListeners() {
+		listenersEnabled = false;
+	}
+
+	public void enableListeners() {
+		listenersEnabled = true;
+	}
+
+
 	
 }

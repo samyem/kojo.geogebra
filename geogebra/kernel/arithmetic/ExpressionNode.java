@@ -1729,7 +1729,24 @@ implements ExpressionValue {
     		
 			return new MyBoolean(strL.equals(strR));      
     	}
-    	else if (lt.isGeoElement() && rt.isGeoElement()) {
+	 else if (lt.isListValue() && rt.isListValue()) {
+		
+		MyList list1 = ((ListValue)lt).getMyList();
+		MyList list2 = ((ListValue)rt).getMyList();
+		
+		int size = list1.size();
+		
+		if ( size != list2.size())
+			return new MyBoolean(false );
+		
+		for (int i = 0 ; i < size ; i++) {
+			if (!evalEquals(list1.getListElement(i).evaluate(), list2.getListElement(i).evaluate()).getBoolean())
+				return new MyBoolean(false);
+		}
+		
+		return new MyBoolean(true);
+		
+	 } else if (lt.isGeoElement() && rt.isGeoElement()) {
     		GeoElement geo1 = (GeoElement) lt;
     		GeoElement geo2 = (GeoElement) rt;
     		
@@ -2877,13 +2894,13 @@ implements ExpressionValue {
 						
 						/* removed Michael Borcherds 2009-02-08
 						 * doesn't work eg  m=1   g(x) = (x - 1)^m (x - 3)
-						 */
+						 *
 						 
 					    // check for 1 in exponent
             			if (isEqualString(right, 1, !valueForm)) {
             				sb.append(leftStr);
             				break;
-            			}   
+            			}   //*/
             			
             	
 		                // left wing                   	

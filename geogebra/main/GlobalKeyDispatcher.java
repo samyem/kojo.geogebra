@@ -1,6 +1,7 @@
 package geogebra.main;
 
 import geogebra.euclidian.EuclidianView;
+import geogebra.export.WorksheetExportDialog;
 import geogebra.kernel.ConstructionDefaults;
 import geogebra.kernel.GeoAngle;
 import geogebra.kernel.GeoBoolean;
@@ -14,11 +15,15 @@ import geogebra.kernel.arithmetic.ExpressionNode;
 
 import java.awt.Color;
 import java.awt.KeyEventDispatcher;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.TreeSet;
 
+import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.text.JTextComponent;
 
@@ -205,6 +210,35 @@ public class GlobalKeyDispatcher implements KeyEventDispatcher {
 				app.getGuiManager().redo();
 				consumed = true;
 				break;
+				
+				/*
+				 * export <applet> tag to clipboard eg for Moodle
+				 */
+			case KeyEvent.VK_M:
+				if (!app.isApplet() && event.isShiftDown()) {
+					app.clearSelectedGeos();
+					WorksheetExportDialog d = new WorksheetExportDialog(app); 		
+
+					Toolkit toolkit = Toolkit.getDefaultToolkit();
+					Clipboard clipboard = toolkit.getSystemClipboard();
+					JPanel appCP = app.getCenterPanel();
+					int width, height;
+					if (appCP != null) {
+						width = appCP.getWidth();
+						height = appCP.getHeight();
+					} else {
+						width = WorksheetExportDialog.DEFAULT_APPLET_WIDTH;
+						height = WorksheetExportDialog.DEFAULT_APPLET_HEIGHT;
+					}		
+
+					clipboard.setContents(new StringSelection(d.getAppletTag(null, width, height, false)), null);
+					d.setVisible(false);
+					d.dispose();
+					consumed = true;
+				}
+				break;
+				
+
 				
 			// ctrl-R updates construction
 			// make sure it works in applets without a menubar

@@ -12,6 +12,7 @@ the Free Software Foundation.
 
 package geogebra.kernel;
 
+import geogebra.euclidian.EuclidianView;
 import geogebra.kernel.arithmetic.NumberValue;
 import geogebra.kernel.optimization.ExtremumFinder;
 import geogebra.kernel.optimization.NegativeRealRootFunction;
@@ -32,16 +33,15 @@ implements EuclidianViewAlgo {
 	// largest possible number of rectangles
 	private static final int MAX_RECTANGLES = 10000;
 	
+	// subsample every 5 pixels
+	private static final int SAMPLE_PIXELS = 5;
+	
 	// find global minimum in an interval with the following heuristic:
 	// 1) sample the function for some values of x in [a, b] 
 	// 2) get x[i] with minimal f(x[i])
 	// 3) use parabolic interpolation and Brent's Method in One Dimension
 	//     for interval x[i-1] to x[i+1]
 	//     (Numerical Recipes in C++, pp.406)
-	
-	// the function is sampled view_steps times over the currently visible part of the x-axis
-	private static final double VIEW_STEPS = 50;
-	private static double xVisibleWidth = 10;
 	
 	private int type;
 	public static final int TYPE_UPPERSUM = 0;
@@ -249,8 +249,7 @@ implements EuclidianViewAlgo {
 		}
 
 	final public void euclidianViewUpdate() {
-		xVisibleWidth = kernel.getXmax() - kernel.getXmin();
-		super.euclidianViewUpdate();
+		compute();
 	}
 	
 	final public boolean wantsEuclidianViewUpdate() {
@@ -394,8 +393,17 @@ implements EuclidianViewAlgo {
 			double cumSum = 0;
 			double left, right, min;			 	
 			
-			double subStep = xVisibleWidth / VIEW_STEPS;	
-			boolean doSubSamples = Math.abs(STEP) > subStep;	
+            // calulate the min and max x-coords of what actually needs to be drawn
+			// do subsampling only in this region
+			EuclidianView ev = app.getEuclidianView();
+            double visibleMin = Math.max(Math.min(ad, bd), ev.getXmin());
+            double visibleMax = Math.min(Math.max(ad, bd), ev.getXmax());	
+            
+            // subsample every 5 pixels
+            double noOfSamples = Math.abs(ev.toScreenCoordXd(visibleMax) - ev.toScreenCoordX(visibleMin)) / SAMPLE_PIXELS;
+            
+			double subStep = Math.abs(visibleMax - visibleMin) / noOfSamples;	
+			boolean doSubSamples = !kernel.isZero(subStep) && Math.abs(STEP) > subStep;	
 			boolean positiveStep = 	STEP >= 0; 		
 			for (int i=0; i < N ; i++) { 
 				leftBorder[i] = ad + i * STEP;	
@@ -411,8 +419,12 @@ implements EuclidianViewAlgo {
 				min = Double.POSITIVE_INFINITY;
 							
 				// heuristic: take some samples in this interval
-				// and find smallest one									
-				if (doSubSamples) { 
+				// and find smallest one	
+				// subsampling needed in case there are two eg minimums and we get the wrong one with extrFinder.findMinimum()
+				//Application.debug(left + " "+ visibleMin+" "+right + " "+visibleMax);
+				// subsample visible bit only
+				if (doSubSamples && ((STEP > 0 ? left : right) < visibleMax && (STEP > 0 ? right : left) > visibleMin )) { 
+
 					double y, minSample = left;				
 					for (double x=left; x < right; x += subStep) {
 						y = fmin.evaluate(x);

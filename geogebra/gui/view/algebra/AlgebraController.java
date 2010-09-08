@@ -118,7 +118,6 @@ public class AlgebraController
 				if (Application.isControlDown(e)) {
 					app.toggleSelectedGeo(geo); 	
 					if (app.getSelectedGeos().contains(geo)) lastSelectedGeo = geo;
-//					app.geoElementSelected(geo, true);
 				} else if (e.isShiftDown() && lastSelectedGeo != null) {
 					boolean nowSelecting = true;
 					boolean selecting = false;
@@ -165,14 +164,15 @@ public class AlgebraController
 					app.clearSelectedGeos();
 					app.addSelectedGeo(geo);
 					lastSelectedGeo = geo;
-//					app.geoElementSelected(geo, false);
 				}
 			}
 		} 
 		else if (mode != EuclidianView.MODE_SELECTION_LISTENER) {
 			// let euclidianView know about the click
 			ev.clickedGeo(geo, e);
-		}
+		} else 
+			// tell selection listener about click
+			app.geoElementSelected(geo, false);
 		
 		// Alt click: copy definition to input field
 		if (geo != null && e.isAltDown() && app.showAlgebraInput()) {			

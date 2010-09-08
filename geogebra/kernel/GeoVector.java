@@ -510,6 +510,8 @@ implements Path, VectorValue, Locateable, Rotateable {
 								1.0);
 								
 		GeoVec3D.lineThroughPoints(pathStartPoint, pathEndPoint, pathSegment);
+		// length is used in GeoSement.pointChanged() and GeoSegment.pathChanged()
+		pathSegment.calcLength(); 
 	}
 	
 	public boolean isGeoVector() {

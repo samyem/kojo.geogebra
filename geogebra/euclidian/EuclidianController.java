@@ -1011,6 +1011,16 @@ MouseMotionListener, MouseWheelListener, ComponentListener {
 		//  checkbox
 		else if (movedGeoElement.isGeoBoolean()) {
 			movedGeoBoolean = (GeoBoolean) movedGeoElement;
+			
+			// if fixed checkbox dragged, behave as if it's been clicked
+			// important for electronic whiteboards
+			if (movedGeoBoolean.isCheckboxFixed()) {
+				movedGeoBoolean.setValue(!movedGeoBoolean.getBoolean());
+				app.removeSelectedGeo(movedGeoBoolean); // make sure it doesn't get selected
+				movedGeoBoolean.updateCascade();
+
+			} 
+			
 			// move checkbox
 			moveMode = MOVE_BOOLEAN;					
 			startLoc = mouseLoc;
@@ -1491,8 +1501,11 @@ MouseMotionListener, MouseWheelListener, ComponentListener {
 				GeoElement hit = (GeoElement)hits.get(0);
 				if (hit != null && hit.isGeoBoolean()) {
 					GeoBoolean bool = (GeoBoolean)(hits.get(0));
-					bool.setValue(!bool.getBoolean());
-					bool.updateCascade();
+					if (!bool.isCheckboxFixed()) { // otherwise changed on mouse down
+						bool.setValue(!bool.getBoolean());
+						app.removeSelectedGeo(bool); // make sure doesn't get selected
+						bool.updateCascade();
+					}
 				}
 			}
 			}
@@ -5426,12 +5439,12 @@ MouseMotionListener, MouseWheelListener, ComponentListener {
 		
 		double factor = event.getKeyCode() == KeyEvent.VK_MINUS ? 1d / EuclidianView.MOUSE_WHEEL_ZOOM_FACTOR
 				: EuclidianView.MOUSE_WHEEL_ZOOM_FACTOR;
-		// make zooming a little bit smoother by having some steps
 
 		// accelerated zoom
 		if (event.isAltDown())
-			factor *= 1.5;
+			factor *= event.getKeyCode() == KeyEvent.VK_MINUS ? 2d/3d: 1.5;
 
+		// make zooming a little bit smoother by having some steps
 		view.setAnimatedCoordSystem(
 				px + dx * factor,
 				py + dy * factor,

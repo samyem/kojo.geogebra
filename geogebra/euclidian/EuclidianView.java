@@ -1104,6 +1104,23 @@ public class EuclidianView extends JPanel implements View, Printable, EuclidianC
 		}
 	}
 
+	public int temporaryWidth = -1;
+	public int temporaryHeight = -1;
+	
+    public int getWidth() { return (temporaryWidth > 0 ) ? temporaryWidth : super.getWidth(); }
+
+    public int getHeight() { return (temporaryHeight > 0 ) ? temporaryHeight :  super.getHeight(); }
+
+    /*
+     * used for rescaling applets when the reset button is hit
+     * use setTemporarySize(-1, -1) to disable
+     */
+	public void setTemporarySize(int w, int h) {
+		width = w;
+		height = h;
+		updateSize();
+	}
+
 	public void updateSize() {
 		width = getWidth();
 		height = getHeight();
@@ -1671,7 +1688,8 @@ public class EuclidianView extends JPanel implements View, Printable, EuclidianC
 		if (app.showResetIcon() && app.isApplet()) {
 			// need to use getApplet().width rather than width so that
 			// it works with applet rescaling
-			g.drawImage(getResetImage(), app.getApplet().width - 18, 2, null);
+			int w = app.onlyGraphicsViewShowing() ? app.getApplet().width : width + 2;
+			g.drawImage(getResetImage(), w - 18, 2, null);
 		}
 	}		
 	

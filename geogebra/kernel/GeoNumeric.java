@@ -25,6 +25,7 @@ import geogebra.kernel.arithmetic.Function;
 import geogebra.kernel.arithmetic.FunctionVariable;
 import geogebra.kernel.arithmetic.MyDouble;
 import geogebra.kernel.arithmetic.NumberValue;
+import geogebra.main.Application;
 
 import java.util.Comparator;
 import java.util.HashSet;
@@ -42,6 +43,7 @@ implements NumberValue,  AbsoluteScreenLocateable, GeoFunctionable, Animatable {
 	private static final long serialVersionUID = 1L;
 	private static int DEFAULT_SLIDER_WIDTH_RW = 4;
 	private static int DEFAULT_SLIDER_WIDTH_PIXEL = 100;	
+	private static int DEFAULT_SLIDER_WIDTH_PIXEL_ANGLE = 72;	
 	double DEFAULT_SLIDER_MIN = -5;
 	double DEFAULT_SLIDER_MAX = 5;
 	
@@ -60,7 +62,7 @@ implements NumberValue,  AbsoluteScreenLocateable, GeoFunctionable, Animatable {
 	private boolean intervalMaxActive = false;
 	private double intervalMin = Double.NEGATIVE_INFINITY;
 	private double intervalMax = Double.POSITIVE_INFINITY; 
-	private double sliderWidth = DEFAULT_SLIDER_WIDTH_PIXEL;
+	private double sliderWidth = this instanceof GeoAngle ? DEFAULT_SLIDER_WIDTH_PIXEL_ANGLE : DEFAULT_SLIDER_WIDTH_PIXEL;
 	private double sliderX, sliderY;
 	private boolean sliderFixed = false;
 	private boolean sliderHorizontal = true;
@@ -575,7 +577,7 @@ implements NumberValue,  AbsoluteScreenLocateable, GeoFunctionable, Animatable {
 	public void setAbsoluteScreenLocActive(boolean flag) {
 		hasAbsoluteScreenLocation = flag;			
 		if (flag)
-			sliderWidth = DEFAULT_SLIDER_WIDTH_PIXEL;
+			sliderWidth = this instanceof GeoAngle ? DEFAULT_SLIDER_WIDTH_PIXEL_ANGLE : DEFAULT_SLIDER_WIDTH_PIXEL;
 		else 
 			sliderWidth = DEFAULT_SLIDER_WIDTH_RW;
 	}

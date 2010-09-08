@@ -3798,9 +3798,7 @@ public class PropertiesDialogGeoElement
 			for (int i = 0; i < geos.length; i++) {
 				GeoElement geo = ((GeoElement) geos[i]).getGeoElementForPropertiesDialog();
 				if (!(geo.isPath()
-					|| geo.isGeoPolygon()
-					|| (geo.isGeoLocus() && ((GeoList)geo).showLineProperties() )
-					|| geo.isGeoList()
+					|| (geo.isGeoList() && ((GeoList)geo).showLineProperties() )
 					|| (geo.isGeoNumeric()
 						&& ((GeoNumeric) geo).isDrawable()))) {
 					geosOK = false;
@@ -5157,7 +5155,10 @@ class ShowConditionPanel
 			try {
 				for (int i = 0; i < geos.length; i++) {
 					GeoElement geo = (GeoElement) geos[i];
-					geo.setShowObjectCondition(cond);				
+					geo.setShowObjectCondition(cond);	
+					
+					// make sure object shown when condition removed
+					if (cond == null) geo.updateRepaint(); 
 				}	
 				
 			} catch (CircularDefinitionException e) {
@@ -5245,6 +5246,7 @@ class ColorFunctionPanel
 				for (int i=0; i < geos.length; i++) {
 					GeoElement geo = (GeoElement) geos[i];	
 					geo.removeColorFunction();
+					geo.setObjColor(geo.getObjectColor());
 					geo.updateRepaint();
 				}
 				tfRed.setText("");
