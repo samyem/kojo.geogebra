@@ -129,9 +129,14 @@ public class GeoGebraCAS {
 		if (ggbMathPiper == null) {
 			// where to find MathPiper scripts
 			//eg docBase = "jar:http://www.geogebra.org/webstart/alpha/geogebra_cas.jar!/";
-			String scriptBase = "jar:" + app.getCodeBase().toString() + 
-										Application.CAS_JAR_NAME + "!/";			
-
+			String appCodeBase = app.getCodeBase().toString();
+			String scriptBase = null;
+			if (appCodeBase.startsWith("jar")) {
+				scriptBase = appCodeBase + Application.CAS_JAR_NAME + "!/";			
+			}
+			else {
+				scriptBase = "jar:" + appCodeBase + Application.CAS_JAR_NAME + "!/";			
+			}
 			ggbMathPiper = Interpreters.getSynchronousInterpreter(scriptBase);
 			boolean success = initMyMathPiperFunctions();
 			

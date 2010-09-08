@@ -65,7 +65,7 @@ public class GeoGebraPanel extends JPanel {
     }
 	
 	
-	private Application app;
+	protected Application app;
 	
 	/**
      * Creates a GeoGebraPanel. Note that you need to 

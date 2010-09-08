@@ -19,6 +19,7 @@ the Free Software Foundation.
 package geogebra.gui;
 
 import geogebra.euclidian.EuclidianView;
+import geogebra.gui.menubar.GeoGebraMenuBar;
 import geogebra.kernel.Kernel;
 import geogebra.main.Application;
 
@@ -120,7 +121,28 @@ implements ActionListener {
         miProperties.addActionListener(this);
         miProperties.setBackground(bgColor);
         add(miProperties);                 
-    }
+
+        addSeparator();     
+        
+        if (app.getGuiManager().getMenuBar() == null) {
+        	app.getGuiManager().initMenubar();
+        }
+        add(((GeoGebraMenuBar)app.getGuiManager().getMenuBar()).getViewMenu());
+        add(((GeoGebraMenuBar)app.getGuiManager().getMenuBar()).getOptionsMenu());
+        add(((GeoGebraMenuBar)app.getGuiManager().getMenuBar()).getEditMenu());
+        
+        addSeparator();     
+        
+        JMenuItem cbLoad = new JMenuItem(((GeoGebraMenuBar)app.getGuiManager().getMenuBar()).getLoadAction());
+        cbLoad.setText("Load From...");
+        add(cbLoad);
+        JMenuItem cbSaveAs = new JMenuItem(((GeoGebraMenuBar)app.getGuiManager().getMenuBar()).getSaveAsAction());
+        cbSaveAs.setText("Save To...");
+        add(cbSaveAs);
+        JMenuItem cbNew = new JMenuItem(((GeoGebraMenuBar)app.getGuiManager().getMenuBar()).getNewAction());
+        cbNew.setText("Clear");
+        add(cbNew);
+}
         
     public void actionPerformed(ActionEvent e) {                                            
     	String cmd = e.getActionCommand();

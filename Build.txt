@@ -1,0 +1,13 @@
+The following (missing) jars are needed for running the ant build script:
+ 
+AppleJavaExtensions.jar  
+p200ant_java5only.jar
+netscape_javascript.jar  
+proguard44.jar
+
+installer/launch4j/launch4j.jar
+installer/nsisant-1.2.jar
+installer/jarbundler-2.1.0.jar
+
+These jar files can be obtained from the original geogebra source tree at http://www.geogebra.org/source/program/
+

@@ -6,7 +6,6 @@ import geogebra.gui.DefaultGuiManager;
 import geogebra.gui.ToolCreationDialog;
 import geogebra.gui.ToolManagerDialog;
 import geogebra.gui.app.GeoGebraFrame;
-import geogebra.gui.inputbar.AlgebraInput;
 import geogebra.gui.view.consprotocol.ConstructionProtocolNavigation;
 import geogebra.kernel.GeoElement;
 import geogebra.kernel.Kernel;
@@ -26,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
@@ -85,9 +85,43 @@ public abstract class MenubarImpl extends JMenuBar implements Menubar {
 	protected Application app;
 
 	protected Kernel kernel;
+	
+	private JMenu viewMenu, optionsMenu, editMenu;
 
 	public MenubarImpl() {
 
+	}
+	
+	public JMenu getViewMenu() {
+		return viewMenu;
+	}
+	
+	public JMenu getOptionsMenu() {
+		return optionsMenu;
+	}
+	
+	public JMenu getEditMenu() {
+		return editMenu;
+	}
+	
+	public Action getSelectAllAction() {
+		return selectAllAction;
+	}
+	
+	public Action getSaveAction() {
+		return saveAction;
+	}
+	
+	public Action getSaveAsAction() {
+		return saveAsAction;
+	}
+	
+	public Action getLoadAction() {
+		return loadAction;
+	}
+	
+	public Action getNewAction() {
+		return deleteAll;
 	}
 	
 	public void updateMenubar() {	
@@ -317,6 +351,7 @@ public abstract class MenubarImpl extends JMenuBar implements Menubar {
 		mi = menu.add(propertiesAction);
 		setMenuShortCutAccelerator(mi, 'E');
 		add(menu);
+		this.editMenu = menu;
 
 		// View
 		menu = new JMenu(app.getMenu("View"));
@@ -392,6 +427,7 @@ public abstract class MenubarImpl extends JMenuBar implements Menubar {
 		
 		
 		add(menu);
+		this.viewMenu = menu;
 
 		// Options
 		menu = new JMenu(app.getMenu("Options"));
@@ -620,6 +656,7 @@ public abstract class MenubarImpl extends JMenuBar implements Menubar {
 		// drawing pad properteis
 		menu.add(drawingPadPropAction);
 		add(menu);
+		this.optionsMenu = menu;
 
 		
 		if (app.isStandaloneApplication() && Application.hasFullPermissions()) 
