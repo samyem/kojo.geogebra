@@ -154,7 +154,8 @@ public class DrawableList {
 	public final void drawAll(Graphics2D g2) {		
 		Link cur = head;
 		while (cur != null) {
-				cur.d.draw(g2);
+			//defined check needed in case the GeoList changed its size
+			if(cur.d.geo.isDefined())cur.d.draw(g2);
 			cur = cur.next;
 		}
 	}	
