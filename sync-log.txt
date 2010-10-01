@@ -3,4 +3,6 @@
 Synced with revision 6752 (Geogebra version 3.2.44.11)
 In commit logs, the revision was incorrectly referred to as 6780 (that was the most recent global revision on the trunk at the time of the sync).
 
-
+01/10/10
+--------
+Synced with revision 6923 (version 3.2.45.0)

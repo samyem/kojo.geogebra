@@ -92,7 +92,7 @@ public class Kernel {
 	public final static double MAX_PRECISION = 1E-12;
 
 	// current working precision
-	private double EPSILON = STANDARD_PRECISION;
+	private static double EPSILON = STANDARD_PRECISION;
 
 	// maximum precision of double numbers
 	public final static double MAX_DOUBLE_PRECISION = 1E-15;
@@ -4900,7 +4900,7 @@ public class Kernel {
 	}
 
 	/** is abs(x) < epsilon ? */
-	final public boolean isZero(double x) {
+	final public static boolean isZero(double x) {
 		return -EPSILON < x && x < EPSILON;
 	}
 
