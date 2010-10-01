@@ -3890,7 +3890,7 @@ public abstract class GeoElement
 					: this.getCommandDescription();
 		}
 		
-		if (ret.equals("") && !this.isGeoText()) {
+		if ("".equals(ret) && !this.isGeoText()) {
 			// eg Text[ (1,2), false]
 			ret = toOutputValueString();
 		}
